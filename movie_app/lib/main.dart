@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'screens/main/main_page.dart';
+import 'constants/app_color.dart';
+import 'constants/app_text_styles.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,10 +19,35 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Cinema App',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: const Scaffold(
-        body: Center(child: Text('Setup API Service Complete')),
+      theme: ThemeData(
+        scaffoldBackgroundColor: AppColors.background,
+
+        colorScheme: const ColorScheme.light(
+          primary: AppColors.primary,
+          secondary: AppColors.cta,
+          surface: AppColors.surface,
+        ),
+
+        textTheme: TextTheme(
+          displayLarge: AppTextStyles.displayLarge,
+          titleLarge: AppTextStyles.headingLarge,
+          titleMedium: AppTextStyles.headingMedium,
+          titleSmall: AppTextStyles.headingSmall,
+          bodyLarge: AppTextStyles.bodyLarge,
+          bodyMedium: AppTextStyles.bodyMedium,
+          bodySmall: AppTextStyles.bodySmall,
+          labelSmall: AppTextStyles.caption,
+        ),
+
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.cta,
+            foregroundColor: AppColors.textOnCta,
+            textStyle: AppTextStyles.button,
+          ),
+        ),
       ),
+      home: const MainPage(),
     );
   }
 }
