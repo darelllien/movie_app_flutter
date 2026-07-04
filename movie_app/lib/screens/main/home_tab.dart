@@ -4,11 +4,8 @@ import '../../services/api_services.dart';
 import '../../models/movie.dart';
 import '../../constants/app_color.dart';
 import '../../constants/app_text_styles.dart';
-<<<<<<< Updated upstream
-=======
 import 'search_page.dart';
 import 'movie_list_tab.dart';
->>>>>>> Stashed changes
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
@@ -26,6 +23,9 @@ class _HomeTabState extends State<HomeTab> {
 
   static const double _plainImageWidth = 130;
   static const double _plainImageHeight = 170;
+
+  static const double _highlightImageWidth = 130;
+  static const double _highlightImageHeight = 180;
 
   static const int _titleMaxLength = 17;
   static const int _titleTruncateLength = 14;
@@ -64,20 +64,6 @@ class _HomeTabState extends State<HomeTab> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-<<<<<<< Updated upstream
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-
-                const SizedBox(height: 24),
-
-              ],
-=======
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 32),
         child: Column(
@@ -85,7 +71,6 @@ class _HomeTabState extends State<HomeTab> {
           children: [
             _buildHeader(context),
             const SizedBox(height: 24),
-
             _buildSectionTitle(
               title: 'Sedang Tayang',
               onSeeAll: () {
@@ -94,16 +79,14 @@ class _HomeTabState extends State<HomeTab> {
                   MaterialPageRoute(builder: (context) => const MovieListTab()),
                 );
               },
->>>>>>> Stashed changes
             ),
             const SizedBox(height: 16),
             _buildMovieCarousel(
               future: _nowPlayingFuture,
               height: _nowPlayingCarouselHeight,
+              highlightCenter: true,
             ),
-
             const SizedBox(height: 24),
-
             _buildSectionTitle(
               title: 'Akan Tayang',
               onSeeAll: () {},
@@ -121,55 +104,6 @@ class _HomeTabState extends State<HomeTab> {
     );
   }
 
-<<<<<<< Updated upstream
-  Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Halo, Irfan! 👋',
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Mau nonton apa hari ini?',
-                  style: AppTextStyles.headingMedium.copyWith(
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-            Container(
-              decoration: const BoxDecoration(
-                color: AppColors.surface,
-                shape: BoxShape.circle,
-              ),
-              child: IconButton(
-                icon: const Icon(Icons.notifications_none),
-                color: AppColors.textPrimary,
-                onPressed: () {
-                },
-              ),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 20),
-
-        TextField(
-          decoration: InputDecoration(
-            hintText: 'Cari judul film atau bioskop...',
-            hintStyle: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
-=======
   Widget _buildHeader(BuildContext context) {
     return Container(
       width: double.infinity,
@@ -227,7 +161,6 @@ class _HomeTabState extends State<HomeTab> {
             onTap: () => Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const SearchPage()),
->>>>>>> Stashed changes
             ),
             decoration: InputDecoration(
               hintText: 'Cari judul film atau bioskop...',
@@ -325,21 +258,21 @@ class _HomeTabState extends State<HomeTab> {
 
         final options = highlightCenter
             ? CarouselOptions(
-          height: height,
-          viewportFraction: _carouselViewportFraction,
-          enlargeCenterPage: true,
-          enlargeFactor: _carouselEnlargeFactor,
-          enlargeStrategy: CenterPageEnlargeStrategy.scale,
-          autoPlay: true,
-          padEnds: true,
-        )
+                height: height,
+                viewportFraction: _carouselViewportFraction,
+                enlargeCenterPage: true,
+                enlargeFactor: _carouselEnlargeFactor,
+                enlargeStrategy: CenterPageEnlargeStrategy.scale,
+                autoPlay: true,
+                padEnds: true,
+              )
             : CarouselOptions(
-          height: height,
-          viewportFraction: _carouselViewportFraction,
-          enlargeCenterPage: false,
-          autoPlay: true,
-          padEnds: false,
-        );
+                height: height,
+                viewportFraction: _carouselViewportFraction,
+                enlargeCenterPage: false,
+                autoPlay: true,
+                padEnds: false,
+              );
 
         return CarouselSlider.builder(
           itemCount: movies.length,
@@ -347,12 +280,11 @@ class _HomeTabState extends State<HomeTab> {
           itemBuilder: (context, index, realIndex) {
             final card = _MovieCarouselCard(
               movie: movies[index],
-              height: height,
+              imageWidth: highlightCenter ? _highlightImageWidth : _plainImageWidth,
+              imageHeight: highlightCenter ? _highlightImageHeight : _plainImageHeight,
               truncateTitle: _truncateTitle,
               formatDate: _formatDate,
               showReleaseDate: showReleaseDate,
-              fixedImageWidth: highlightCenter ? null : _plainImageWidth,
-              fixedImageHeight: highlightCenter ? null : _plainImageHeight,
             );
 
             if (highlightCenter) {
@@ -372,63 +304,55 @@ class _HomeTabState extends State<HomeTab> {
 
 class _MovieCarouselCard extends StatelessWidget {
   final Movie movie;
-  final double height;
+  final double imageWidth;
+  final double imageHeight;
   final String Function(String title) truncateTitle;
   final String Function(String date) formatDate;
   final bool showReleaseDate;
-  final double? fixedImageWidth;
-  final double? fixedImageHeight;
 
   const _MovieCarouselCard({
     required this.movie,
-    required this.height,
+    required this.imageWidth,
+    required this.imageHeight,
     required this.truncateTitle,
     required this.formatDate,
     this.showReleaseDate = false,
-    this.fixedImageWidth,
-    this.fixedImageHeight,
   });
 
-  Widget _buildPoster() {
-    final image = Image.network(
-      movie.fullPosterUrl,
-      width: fixedImageWidth,
-      height: fixedImageHeight,
-      fit: BoxFit.cover,
-      loadingBuilder: (context, child, progress) {
-        if (progress == null) return child;
-        return Container(
-          width: fixedImageWidth,
-          height: fixedImageHeight,
-          color: AppColors.surface,
-          child: Center(
-            child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
-          ),
-        );
-      },
-      errorBuilder: (context, error, stackTrace) {
-        return Container(
-          width: fixedImageWidth,
-          height: fixedImageHeight,
-          color: AppColors.surface,
-          child: Icon(Icons.broken_image, color: AppColors.textSecondary),
-        );
-      },
-    );
-
-    final clipped = ClipRRect(
-      borderRadius: BorderRadius.circular(fixedImageWidth != null ? 12 : 16),
-      child: image,
-    );
-
-    return fixedImageWidth != null ? clipped : Expanded(child: clipped);
-  }
-
-  Widget _buildTitleAndDate() {
+  @override
+  Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.network(
+            movie.fullPosterUrl,
+            width: imageWidth,
+            height: imageHeight,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, progress) {
+              if (progress == null) return child;
+              return SizedBox(
+                width: imageWidth,
+                height: imageHeight,
+                child: Center(
+                  child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) {
+              return Container(
+                width: imageWidth,
+                height: imageHeight,
+                color: AppColors.surface,
+                child: Icon(Icons.broken_image, color: AppColors.textSecondary),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 6),
         Text(
           truncateTitle(movie.title),
           maxLines: 1,
@@ -446,34 +370,6 @@ class _MovieCarouselCard extends StatelessWidget {
           ),
         ],
       ],
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final content = [
-      _buildPoster(),
-      const SizedBox(height: 6),
-      _buildTitleAndDate(),
-    ];
-
-    if (fixedImageWidth != null) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: content,
-      );
-    }
-
-    return SizedBox(
-      height: height,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 6),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: content,
-        ),
-      ),
     );
   }
 }
