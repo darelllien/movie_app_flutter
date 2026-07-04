@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../constants/app_color.dart';
 import '../../constants/app_text_styles.dart';
+import 'search_page.dart';
 
 class HomeTab extends StatelessWidget {
   const HomeTab({super.key});
@@ -16,10 +17,9 @@ class HomeTab extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(),
+                _buildHeader(context),
 
                 const SizedBox(height: 24),
-
               ],
             ),
           ),
@@ -28,7 +28,7 @@ class HomeTab extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -71,6 +71,13 @@ class HomeTab extends StatelessWidget {
         const SizedBox(height: 20),
 
         TextField(
+          readOnly: true,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SearchPage()),
+            );
+          },
           decoration: InputDecoration(
             hintText: 'Cari judul film atau bioskop...',
             hintStyle: AppTextStyles.bodyMedium.copyWith(
