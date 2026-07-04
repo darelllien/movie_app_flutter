@@ -5,10 +5,31 @@ import '../models/movie.dart';
 
 class ApiService {
   final String baseUrl = 'https://api.themoviedb.org/3';
-  final String _token = dotenv.get('TMDB_TOKEN');
+
+  final String _token = dotenv.maybeGet('TMDB_TOKEN') ?? '';
 
   Future<List<Movie>> getNowPlayingMovies() async {
     final url = Uri.parse('$baseUrl/movie/now_playing?language=id-ID&page=1');
+    return _fetchMovieList(url);
+  }
+
+  Future<List<Movie>> getUpcomingMovies() async {
+    final url = Uri.parse('$baseUrl/movie/upcoming?language=id-ID&page=1');
+    return _fetchMovieList(url);
+  }
+
+  Future<List<Movie>> getPopularMovies() async {
+    final url = Uri.parse('$baseUrl/movie/popular?language=id-ID&page=1');
+    return _fetchMovieList(url);
+  }
+
+  Future<List<Movie>> _fetchMovieList(Uri url) async {
+    if (_token.isEmpty) {
+      throw Exception(
+        'API Token tidak ditemukan! Periksa kembali file .env Anda.',
+      );
+    }
+
     try {
       final response = await http.get(
         url,
@@ -19,16 +40,17 @@ class ApiService {
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = json.decode(
-          response.statusCode == 200 ? response.body : '',
-        );
-        final List<dynamic> results = data['results'];
+        final Map<String, dynamic> data = json.decode(response.body);
+        final List<dynamic> results = data['results'] ?? [];
+
         return results.map((json) => Movie.fromJson(json)).toList();
       } else {
-        throw Exception('Gagal memuat data film: ${response.statusCode}');
+        throw Exception(
+          'Gagal memuat data dari TMDB. Status Code: ${response.statusCode}',
+        );
       }
     } catch (e) {
-      throw Exception('Terjadi kesalahan jaringan: $e');
+      throw Exception('Terjadi kesalahan jaringan atau parse data: $e');
     }
   }
 }
