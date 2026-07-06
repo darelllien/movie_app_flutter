@@ -4,6 +4,7 @@ import '../../services/api_services.dart';
 import '../../models/movie.dart';
 import '../../constants/app_color.dart';
 import '../../constants/app_text_styles.dart';
+import '../../utils/formatters.dart';
 import 'search_page.dart';
 import 'movie_list_tab.dart';
 
@@ -16,7 +17,6 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   static const double _pagePadding = 20;
-
   static const double _upcomingCarouselHeight = 240;
   static const double _posterAspectRatio = 2 / 3;
 
@@ -27,14 +27,6 @@ class _HomeTabState extends State<HomeTab> {
   static const double _plainImageWidth = 130;
   static const double _plainImageHeight = 170;
 
-  static const int _titleMaxLength = 17;
-  static const int _titleTruncateLength = 14;
-
-  static const List<String> _monthLabels = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-  ];
-
   final ApiService _apiService = ApiService();
   late final Future<List<Movie>> _nowPlayingFuture;
   late final Future<List<Movie>> _upcomingFuture;
@@ -42,22 +34,36 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     super.initState();
-    _nowPlayingFuture = _apiService.getNowPlayingMovies();
-    _upcomingFuture = _apiService.getUpcomingMovies();
+    _fetchAndFilterNowPlaying();
+    _fetchAndFilterUpcoming();
   }
 
-  String _truncateTitle(String title) {
-    if (title.length <= _titleMaxLength) return title;
-    return '${title.substring(0, _titleTruncateLength)}...';
+  void _fetchAndFilterNowPlaying() {
+    final now = DateTime.now();
+    _nowPlayingFuture = _apiService.getNowPlayingMovies().then((movies) {
+      return movies.where((movie) {
+        try {
+          final releaseDate = DateTime.parse(movie.releaseDate);
+          return releaseDate.isBefore(now) || releaseDate.isAtSameMomentAs(now);
+        } catch (_) {
+          return true;
+        }
+      }).toList();
+    });
   }
 
-  String _formatDate(String dateStr) {
-    try {
-      final date = DateTime.parse(dateStr);
-      return '${date.day} ${_monthLabels[date.month - 1]} ${date.year}';
-    } catch (_) {
-      return dateStr;
-    }
+  void _fetchAndFilterUpcoming() {
+    final now = DateTime.now();
+    _upcomingFuture = _apiService.getUpcomingMovies().then((movies) {
+      return movies.where((movie) {
+        try {
+          final releaseDate = DateTime.parse(movie.releaseDate);
+          return releaseDate.isAfter(now);
+        } catch (_) {
+          return true;
+        }
+      }).toList();
+    });
   }
 
   double _nowPlayingCardHeight(BuildContext context) {
@@ -80,15 +86,21 @@ class _HomeTabState extends State<HomeTab> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 24),
+
                   _buildSectionTitle(
                     title: 'Sedang Tayang',
                     onSeeAll: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const MovieListTab()),
+                        MaterialPageRoute(
+                          builder: (context) => const MovieListTab(
+                            type: MovieListType.nowPlaying,
+                          ),
+                        ),
                       );
                     },
                   ),
+
                   const SizedBox(height: 16),
                   _buildMovieCarousel(
                     future: _nowPlayingFuture,
@@ -96,10 +108,21 @@ class _HomeTabState extends State<HomeTab> {
                     highlightCenter: true,
                   ),
                   const SizedBox(height: 24),
+
                   _buildSectionTitle(
                     title: 'Akan Tayang',
-                    onSeeAll: () {},
+                    onSeeAll: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const MovieListTab(
+                            type: MovieListType.upcoming,
+                          ),
+                        ),
+                      );
+                    },
                   ),
+
                   const SizedBox(height: 16),
                   _buildMovieCarousel(
                     future: _upcomingFuture,
@@ -238,7 +261,7 @@ class _HomeTabState extends State<HomeTab> {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return SizedBox(
             height: height,
-            child: Center(
+            child: const Center(
               child: CircularProgressIndicator(color: AppColors.primary),
             ),
           );
@@ -307,8 +330,6 @@ class _HomeTabState extends State<HomeTab> {
               movie: movies[index],
               imageWidth: _plainImageWidth,
               imageHeight: _plainImageHeight,
-              truncateTitle: _truncateTitle,
-              formatDate: _formatDate,
               showReleaseDate: showReleaseDate,
             );
 
@@ -349,7 +370,7 @@ class _NowPlayingCard extends StatelessWidget {
                 if (progress == null) return child;
                 return Container(
                   color: AppColors.surface,
-                  child: Center(
+                  child: const Center(
                     child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
                   ),
                 );
@@ -357,7 +378,7 @@ class _NowPlayingCard extends StatelessWidget {
               errorBuilder: (context, error, stackTrace) {
                 return Container(
                   color: AppColors.surface,
-                  child: Icon(Icons.broken_image, color: AppColors.textSecondary),
+                  child: const Icon(Icons.broken_image, color: AppColors.textSecondary),
                 );
               },
             ),
@@ -390,7 +411,7 @@ class _NowPlayingCard extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.star, size: 14, color: AppColors.cta),
+                        const Icon(Icons.star, size: 14, color: AppColors.cta),
                         const SizedBox(width: 4),
                         Text(
                           movie.voteAverage.toStringAsFixed(1),
@@ -427,16 +448,12 @@ class _MovieCarouselCard extends StatelessWidget {
   final Movie movie;
   final double imageWidth;
   final double imageHeight;
-  final String Function(String title) truncateTitle;
-  final String Function(String date) formatDate;
   final bool showReleaseDate;
 
   const _MovieCarouselCard({
     required this.movie,
     required this.imageWidth,
     required this.imageHeight,
-    required this.truncateTitle,
-    required this.formatDate,
     this.showReleaseDate = false,
   });
 
@@ -458,7 +475,7 @@ class _MovieCarouselCard extends StatelessWidget {
               return SizedBox(
                 width: imageWidth,
                 height: imageHeight,
-                child: Center(
+                child: const Center(
                   child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
                 ),
               );
@@ -468,14 +485,14 @@ class _MovieCarouselCard extends StatelessWidget {
                 width: imageWidth,
                 height: imageHeight,
                 color: AppColors.surface,
-                child: Icon(Icons.broken_image, color: AppColors.textSecondary),
+                child: const Icon(Icons.broken_image, color: AppColors.textSecondary),
               );
             },
           ),
         ),
         const SizedBox(height: 6),
         Text(
-          truncateTitle(movie.title),
+          Formatters.truncateTitle(movie.title),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: AppTextStyles.bodyMedium.copyWith(
@@ -486,7 +503,7 @@ class _MovieCarouselCard extends StatelessWidget {
         if (showReleaseDate) ...[
           const SizedBox(height: 2),
           Text(
-            'Rilis: ${formatDate(movie.releaseDate)}',
+            'Rilis: ${Formatters.formatDate(movie.releaseDate)}',
             style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
           ),
         ],
