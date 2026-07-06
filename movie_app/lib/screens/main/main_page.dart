@@ -17,7 +17,7 @@ class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
 
   final List<Widget> _tabs = [
-    HomeTab(),
+    const HomeTab(),
     const MovieListTab(),
     const CinemaListTab(),
     const ProfileTab(),
@@ -50,8 +50,8 @@ class _MainPageState extends State<MainPage> {
 
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
-          BottomNavigationBarItem(icon: Icon(Icons.movie), label: 'Movie'),
-          BottomNavigationBarItem(icon: Icon(Icons.local_movies), label: 'Cinema'),
+          BottomNavigationBarItem(icon: Icon(Icons.movie), label: 'Film'),
+          BottomNavigationBarItem(icon: Icon(Icons.local_movies), label: 'Bioskop'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),
