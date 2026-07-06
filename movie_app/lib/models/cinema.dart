@@ -3,6 +3,7 @@ class Cinema {
   final String name;
   final String logoUrl;
   final String address;
+  final String city;
   final double rating;
   final String operatingHours;
 
@@ -11,6 +12,7 @@ class Cinema {
     required this.name,
     required this.logoUrl,
     required this.address,
+    required this.city,
     required this.rating,
     required this.operatingHours,
   });
