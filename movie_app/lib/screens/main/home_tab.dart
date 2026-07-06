@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import '../../services/api_services.dart';
+import '../../repositories/movie_repository.dart';
 import '../../models/movie.dart';
 import '../../constants/app_color.dart';
 import '../../constants/app_text_styles.dart';
@@ -27,43 +27,18 @@ class _HomeTabState extends State<HomeTab> {
   static const double _plainImageWidth = 130;
   static const double _plainImageHeight = 170;
 
-  final ApiService _apiService = ApiService();
+  // Cukup panggil Repository, tidak perlu panggil ApiService lagi
+  final MovieRepository _movieRepository = MovieRepository();
+
   late final Future<List<Movie>> _nowPlayingFuture;
   late final Future<List<Movie>> _upcomingFuture;
 
   @override
   void initState() {
     super.initState();
-    _fetchAndFilterNowPlaying();
-    _fetchAndFilterUpcoming();
-  }
-
-  void _fetchAndFilterNowPlaying() {
-    final now = DateTime.now();
-    _nowPlayingFuture = _apiService.getNowPlayingMovies().then((movies) {
-      return movies.where((movie) {
-        try {
-          final releaseDate = DateTime.parse(movie.releaseDate);
-          return releaseDate.isBefore(now) || releaseDate.isAtSameMomentAs(now);
-        } catch (_) {
-          return true;
-        }
-      }).toList();
-    });
-  }
-
-  void _fetchAndFilterUpcoming() {
-    final now = DateTime.now();
-    _upcomingFuture = _apiService.getUpcomingMovies().then((movies) {
-      return movies.where((movie) {
-        try {
-          final releaseDate = DateTime.parse(movie.releaseDate);
-          return releaseDate.isAfter(now);
-        } catch (_) {
-          return true;
-        }
-      }).toList();
-    });
+    // Sangat bersih! Logika filter waktu sudah diurus oleh Repository
+    _nowPlayingFuture = _movieRepository.getNowPlayingMovies();
+    _upcomingFuture = _movieRepository.getUpcomingMovies();
   }
 
   double _nowPlayingCardHeight(BuildContext context) {
@@ -355,89 +330,91 @@ class _NowPlayingCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
-      child: SizedBox(
-        height: height,
-        width: double.infinity,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            Image.network(
-              movie.fullPosterUrl,
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, progress) {
-                if (progress == null) return child;
-                return Container(
-                  color: AppColors.surface,
-                  child: const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
+    return GestureDetector(
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: SizedBox(
+          height: height,
+          width: double.infinity,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              Image.network(
+                movie.fullPosterUrl,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return Container(
+                    color: AppColors.surface,
+                    child: const Center(
+                      child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: AppColors.surface,
+                    child: const Icon(Icons.broken_image, color: AppColors.textSecondary),
+                  );
+                },
+              ),
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      AppColors.black.withValues(alpha: 0),
+                      AppColors.black.withValues(alpha: 0.85),
+                    ],
+                    stops: const [0.45, 1.0],
                   ),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: AppColors.surface,
-                  child: const Icon(Icons.broken_image, color: AppColors.textSecondary),
-                );
-              },
-            ),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    AppColors.black.withValues(alpha: 0),
-                    AppColors.black.withValues(alpha: 0.85),
-                  ],
-                  stops: const [0.45, 1.0],
                 ),
               ),
-            ),
-            Positioned(
-              left: 12,
-              right: 12,
-              bottom: 14,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: AppColors.black.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(Icons.star, size: 14, color: AppColors.cta),
-                        const SizedBox(width: 4),
-                        Text(
-                          movie.voteAverage.toStringAsFixed(1),
-                          style: AppTextStyles.bodySmall.copyWith(
-                            color: AppColors.white,
-                            fontWeight: FontWeight.bold,
+              Positioned(
+                left: 12,
+                right: 12,
+                bottom: 14,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.black.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.star, size: 14, color: AppColors.cta),
+                          const SizedBox(width: 4),
+                          Text(
+                            movie.voteAverage.toStringAsFixed(1),
+                            style: AppTextStyles.bodySmall.copyWith(
+                              color: AppColors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    movie.title,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: AppTextStyles.headingSmall.copyWith(
-                      color: AppColors.white,
-                      fontWeight: FontWeight.bold,
+                    const SizedBox(height: 8),
+                    Text(
+                      movie.title,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.headingSmall.copyWith(
+                        color: AppColors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -459,55 +436,57 @@ class _MovieCarouselCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Image.network(
-            movie.fullPosterUrl,
-            width: imageWidth,
-            height: imageHeight,
-            fit: BoxFit.cover,
-            loadingBuilder: (context, child, progress) {
-              if (progress == null) return child;
-              return SizedBox(
-                width: imageWidth,
-                height: imageHeight,
-                child: const Center(
-                  child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
-                ),
-              );
-            },
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                width: imageWidth,
-                height: imageHeight,
-                color: AppColors.surface,
-                child: const Icon(Icons.broken_image, color: AppColors.textSecondary),
-              );
-            },
+    return GestureDetector(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.network(
+              movie.fullPosterUrl,
+              width: imageWidth,
+              height: imageHeight,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, progress) {
+                if (progress == null) return child;
+                return SizedBox(
+                  width: imageWidth,
+                  height: imageHeight,
+                  child: const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: imageWidth,
+                  height: imageHeight,
+                  color: AppColors.surface,
+                  child: const Icon(Icons.broken_image, color: AppColors.textSecondary),
+                );
+              },
+            ),
           ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          Formatters.truncateTitle(movie.title),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.bodyMedium.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        if (showReleaseDate) ...[
-          const SizedBox(height: 2),
+          const SizedBox(height: 6),
           Text(
-            'Rilis: ${Formatters.formatDate(movie.releaseDate)}',
-            style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+            Formatters.truncateTitle(movie.title),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
           ),
+          if (showReleaseDate) ...[
+            const SizedBox(height: 2),
+            Text(
+              'Rilis: ${Formatters.formatDate(movie.releaseDate)}',
+              style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }
