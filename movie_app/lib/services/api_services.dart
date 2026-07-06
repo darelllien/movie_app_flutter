@@ -9,12 +9,12 @@ class ApiService {
   final String _token = dotenv.maybeGet('TMDB_TOKEN') ?? '';
 
   Future<List<Movie>> getNowPlayingMovies() async {
-    final url = Uri.parse('$baseUrl/movie/now_playing?language=id-ID&page=1');
+    final url = Uri.parse('$baseUrl/movie/now_playing?language=id-ID&page=1&with_original_language=en|id');
     return _fetchMovieList(url);
   }
 
   Future<List<Movie>> getUpcomingMovies() async {
-    final url = Uri.parse('$baseUrl/movie/upcoming?language=id-ID&page=1');
+    final url = Uri.parse('$baseUrl/movie/upcoming?language=id-ID&page=1&with_original_language=en|id');
     return _fetchMovieList(url);
   }
 

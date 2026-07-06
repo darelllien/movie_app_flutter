@@ -3,6 +3,7 @@ import '../services/api_services.dart';
 
 class MovieRepository {
   final ApiService _apiService = ApiService();
+  final RegExp _containsNonAscii = RegExp(r'[^\x00-\x7F]');
 
   Future<List<Movie>> getNowPlayingMovies() async {
     final movies = await _apiService.getNowPlayingMovies();
@@ -11,13 +12,17 @@ class MovieRepository {
 
     return movies.where((movie) {
       try {
+        if (_containsNonAscii.hasMatch(movie.title)) {
+          return false;
+        }
+
         final releaseDate = DateTime.parse(movie.releaseDate);
         final isPastOrToday = releaseDate.isBefore(now) || releaseDate.isAtSameMomentAs(now);
         final isNotTooOld = releaseDate.isAfter(oneMonthAgo);
 
         return isPastOrToday && isNotTooOld;
       } catch (_) {
-        return true;
+        return false;
       }
     }).toList();
   }
@@ -28,10 +33,12 @@ class MovieRepository {
 
     return movies.where((movie) {
       try {
+        if (_containsNonAscii.hasMatch(movie.title)) return false;
+
         final releaseDate = DateTime.parse(movie.releaseDate);
         return releaseDate.isAfter(now);
       } catch (_) {
-        return true;
+        return false;
       }
     }).toList();
   }
