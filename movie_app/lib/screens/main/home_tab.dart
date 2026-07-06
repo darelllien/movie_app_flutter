@@ -15,17 +15,17 @@ class HomeTab extends StatefulWidget {
 }
 
 class _HomeTabState extends State<HomeTab> {
-  static const double _nowPlayingCarouselHeight = 260;
-  static const double _upcomingCarouselHeight = 240;
+  static const double _pagePadding = 20;
 
-  static const double _carouselViewportFraction = 0.35;
+  static const double _upcomingCarouselHeight = 240;
+  static const double _posterAspectRatio = 2 / 3;
+
+  static const double _highlightViewportFraction = 0.5;
+  static const double _plainViewportFraction = 0.35;
   static const double _carouselEnlargeFactor = 0.18;
 
   static const double _plainImageWidth = 130;
   static const double _plainImageHeight = 170;
-
-  static const double _highlightImageWidth = 130;
-  static const double _highlightImageHeight = 180;
 
   static const int _titleMaxLength = 17;
   static const int _titleTruncateLength = 14;
@@ -60,46 +60,58 @@ class _HomeTabState extends State<HomeTab> {
     }
   }
 
+  double _nowPlayingCardHeight(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final itemWidth = screenWidth * _highlightViewportFraction;
+    return itemWidth / _posterAspectRatio;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.only(bottom: 32),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildHeader(context),
-            const SizedBox(height: 24),
-            _buildSectionTitle(
-              title: 'Sedang Tayang',
-              onSeeAll: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const MovieListTab()),
-                );
-              },
+      body: Column(
+        children: [
+          _buildHeader(context),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.only(bottom: 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 24),
+                  _buildSectionTitle(
+                    title: 'Sedang Tayang',
+                    onSeeAll: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const MovieListTab()),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  _buildMovieCarousel(
+                    future: _nowPlayingFuture,
+                    height: _nowPlayingCardHeight(context),
+                    highlightCenter: true,
+                  ),
+                  const SizedBox(height: 24),
+                  _buildSectionTitle(
+                    title: 'Akan Tayang',
+                    onSeeAll: () {},
+                  ),
+                  const SizedBox(height: 16),
+                  _buildMovieCarousel(
+                    future: _upcomingFuture,
+                    height: _upcomingCarouselHeight,
+                    highlightCenter: false,
+                    showReleaseDate: true,
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 16),
-            _buildMovieCarousel(
-              future: _nowPlayingFuture,
-              height: _nowPlayingCarouselHeight,
-              highlightCenter: true,
-            ),
-            const SizedBox(height: 24),
-            _buildSectionTitle(
-              title: 'Akan Tayang',
-              onSeeAll: () {},
-            ),
-            const SizedBox(height: 16),
-            _buildMovieCarousel(
-              future: _upcomingFuture,
-              height: _upcomingCarouselHeight,
-              highlightCenter: false,
-              showReleaseDate: true,
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -109,8 +121,8 @@ class _HomeTabState extends State<HomeTab> {
       width: double.infinity,
       padding: EdgeInsets.only(
         top: MediaQuery.of(context).padding.top + 20,
-        left: 20,
-        right: 20,
+        left: _pagePadding,
+        right: _pagePadding,
         bottom: 24,
       ),
       decoration: const BoxDecoration(
@@ -150,7 +162,13 @@ class _HomeTabState extends State<HomeTab> {
                 child: IconButton(
                   icon: const Icon(Icons.notifications_none),
                   color: AppColors.primary,
-                  onPressed: () {},
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Fitur ini masih belum tersedia saat ini'),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
@@ -185,7 +203,7 @@ class _HomeTabState extends State<HomeTab> {
     required VoidCallback onSeeAll,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: _pagePadding),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -258,46 +276,149 @@ class _HomeTabState extends State<HomeTab> {
 
         final options = highlightCenter
             ? CarouselOptions(
-                height: height,
-                viewportFraction: _carouselViewportFraction,
-                enlargeCenterPage: true,
-                enlargeFactor: _carouselEnlargeFactor,
-                enlargeStrategy: CenterPageEnlargeStrategy.scale,
-                autoPlay: true,
-                padEnds: true,
-              )
+          height: height,
+          viewportFraction: _highlightViewportFraction,
+          enlargeCenterPage: true,
+          enlargeFactor: _carouselEnlargeFactor,
+          enlargeStrategy: CenterPageEnlargeStrategy.scale,
+          autoPlay: true,
+          padEnds: true,
+        )
             : CarouselOptions(
-                height: height,
-                viewportFraction: _carouselViewportFraction,
-                enlargeCenterPage: false,
-                autoPlay: true,
-                padEnds: false,
-              );
+          height: height,
+          viewportFraction: _plainViewportFraction,
+          enlargeCenterPage: false,
+          autoPlay: true,
+          padEnds: false,
+        );
 
         return CarouselSlider.builder(
           itemCount: movies.length,
           options: options,
           itemBuilder: (context, index, realIndex) {
+            if (highlightCenter) {
+              return _NowPlayingCard(
+                movie: movies[index],
+                height: height,
+              );
+            }
+
             final card = _MovieCarouselCard(
               movie: movies[index],
-              imageWidth: highlightCenter ? _highlightImageWidth : _plainImageWidth,
-              imageHeight: highlightCenter ? _highlightImageHeight : _plainImageHeight,
+              imageWidth: _plainImageWidth,
+              imageHeight: _plainImageHeight,
               truncateTitle: _truncateTitle,
               formatDate: _formatDate,
               showReleaseDate: showReleaseDate,
             );
 
-            if (highlightCenter) {
-              return card;
-            }
-
             return Container(
-              margin: EdgeInsets.only(left: index == 0 ? 20 : 6, right: 6),
+              margin: EdgeInsets.only(left: index == 0 ? _pagePadding : 6, right: 6),
               child: card,
             );
           },
         );
       },
+    );
+  }
+}
+
+class _NowPlayingCard extends StatelessWidget {
+  final Movie movie;
+  final double height;
+
+  const _NowPlayingCard({
+    required this.movie,
+    required this.height,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: SizedBox(
+        height: height,
+        width: double.infinity,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.network(
+              movie.fullPosterUrl,
+              fit: BoxFit.cover,
+              loadingBuilder: (context, child, progress) {
+                if (progress == null) return child;
+                return Container(
+                  color: AppColors.surface,
+                  child: Center(
+                    child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
+                  ),
+                );
+              },
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: AppColors.surface,
+                  child: Icon(Icons.broken_image, color: AppColors.textSecondary),
+                );
+              },
+            ),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    AppColors.black.withValues(alpha: 0),
+                    AppColors.black.withValues(alpha: 0.85),
+                  ],
+                  stops: const [0.45, 1.0],
+                ),
+              ),
+            ),
+            Positioned(
+              left: 12,
+              right: 12,
+              bottom: 14,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.black.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.star, size: 14, color: AppColors.cta),
+                        const SizedBox(width: 4),
+                        Text(
+                          movie.voteAverage.toStringAsFixed(1),
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    movie.title,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.headingSmall.copyWith(
+                      color: AppColors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }
