@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../services/api_services.dart';
+import '../../repositories/movie_repository.dart';
 import '../../models/movie.dart';
 import '../../constants/app_color.dart';
 import '../../constants/app_text_styles.dart';
@@ -21,7 +21,7 @@ class MovieListTab extends StatefulWidget {
 
 class _MovieListTabState extends State<MovieListTab> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final ApiService _apiService = ApiService();
+  final MovieRepository _movieRepository = MovieRepository();
 
   late Future<List<Movie>> _nowPlayingFuture;
   late Future<List<Movie>> _upcomingFuture;
@@ -32,43 +32,8 @@ class _MovieListTabState extends State<MovieListTab> with SingleTickerProviderSt
 
     int initialIndex = widget.type == MovieListType.nowPlaying ? 0 : 1;
     _tabController = TabController(length: 2, vsync: this, initialIndex: initialIndex);
-
-    _fetchAndFilterNowPlaying();
-    _fetchAndFilterUpcoming();
-  }
-
-  void _fetchAndFilterNowPlaying() {
-    final now = DateTime.now();
-    final oneMonthAgo = now.subtract(const Duration(days: 30));
-
-    _nowPlayingFuture = _apiService.getNowPlayingMovies().then((movies) {
-      return movies.where((movie) {
-        try {
-          final releaseDate = DateTime.parse(movie.releaseDate);
-          final isPastOrToday = releaseDate.isBefore(now) || releaseDate.isAtSameMomentAs(now);
-          final isNotTooOld = releaseDate.isAfter(oneMonthAgo);
-
-          return isPastOrToday && isNotTooOld;
-        } catch (_) {
-          return true;
-        }
-      }).toList();
-    });
-  }
-
-  void _fetchAndFilterUpcoming() {
-    final now = DateTime.now();
-
-    _upcomingFuture = _apiService.getUpcomingMovies().then((movies) {
-      return movies.where((movie) {
-        try {
-          final releaseDate = DateTime.parse(movie.releaseDate);
-          return releaseDate.isAfter(now);
-        } catch (_) {
-          return true;
-        }
-      }).toList();
-    });
+    _nowPlayingFuture = _movieRepository.getNowPlayingMovies();
+    _upcomingFuture = _movieRepository.getUpcomingMovies();
   }
 
   @override
@@ -189,69 +154,71 @@ class _MovieGridCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              movie.fullPosterUrl,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              loadingBuilder: (context, child, progress) {
-                if (progress == null) return child;
-                return Container(
-                  color: AppColors.surface,
-                  child: const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
-                  ),
-                );
-              },
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: AppColors.surface,
-                  child: const Icon(Icons.broken_image, color: AppColors.textSecondary),
-                );
-              },
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-
-        Text(
-          Formatters.truncateTitle(movie.title),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: AppTextStyles.bodyMedium.copyWith(
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 4),
-
-        isUpcoming
-            ? Text(
-          'Rilis: ${Formatters.formatDate(movie.releaseDate)}',
-          style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.bold,
-          ),
-        )
-            : Row(
-          children: [
-            const Icon(Icons.star, size: 14, color: AppColors.cta),
-            const SizedBox(width: 4),
-            Text(
-              movie.voteAverage.toStringAsFixed(1),
-              style: AppTextStyles.bodySmall.copyWith(
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.bold,
+    return GestureDetector(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(12),
+              child: Image.network(
+                movie.fullPosterUrl,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, progress) {
+                  if (progress == null) return child;
+                  return Container(
+                    color: AppColors.surface,
+                    child: const Center(
+                      child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: AppColors.surface,
+                    child: const Icon(Icons.broken_image, color: AppColors.textSecondary),
+                  );
+                },
               ),
             ),
-          ],
-        ),
-      ],
+          ),
+          const SizedBox(height: 10),
+
+          Text(
+            Formatters.truncateTitle(movie.title),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 4),
+
+          isUpcoming
+              ? Text(
+            'Rilis: ${Formatters.formatDate(movie.releaseDate)}',
+            style: AppTextStyles.bodySmall.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.bold,
+            ),
+          )
+              : Row(
+            children: [
+              const Icon(Icons.star, size: 14, color: AppColors.cta),
+              const SizedBox(width: 4),
+              Text(
+                movie.voteAverage.toStringAsFixed(1),
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
