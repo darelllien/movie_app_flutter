@@ -5,6 +5,7 @@ import '../../models/movie.dart';
 import '../../constants/app_color.dart';
 import '../../constants/app_text_styles.dart';
 import '../../utils/formatters.dart';
+import '../details/movie_detail_page.dart';
 import 'search_page.dart';
 import 'movie_list_tab.dart';
 
@@ -17,17 +18,15 @@ class HomeTab extends StatefulWidget {
 
 class _HomeTabState extends State<HomeTab> {
   static const double _pagePadding = 20;
-  static const double _upcomingCarouselHeight = 240;
+  static const double _upcomingListHeight = 240;
   static const double _posterAspectRatio = 2 / 3;
 
   static const double _highlightViewportFraction = 0.5;
-  static const double _plainViewportFraction = 0.35;
   static const double _carouselEnlargeFactor = 0.18;
 
   static const double _plainImageWidth = 130;
   static const double _plainImageHeight = 170;
 
-  // Cukup panggil Repository, tidak perlu panggil ApiService lagi
   final MovieRepository _movieRepository = MovieRepository();
 
   late final Future<List<Movie>> _nowPlayingFuture;
@@ -36,7 +35,6 @@ class _HomeTabState extends State<HomeTab> {
   @override
   void initState() {
     super.initState();
-    // Sangat bersih! Logika filter waktu sudah diurus oleh Repository
     _nowPlayingFuture = _movieRepository.getNowPlayingMovies();
     _upcomingFuture = _movieRepository.getUpcomingMovies();
   }
@@ -77,11 +75,12 @@ class _HomeTabState extends State<HomeTab> {
                   ),
 
                   const SizedBox(height: 16),
-                  _buildMovieCarousel(
+                  _buildMovieStateWrapper(
                     future: _nowPlayingFuture,
                     height: _nowPlayingCardHeight(context),
-                    highlightCenter: true,
+                    onSuccess: (movies) => _buildNowPlayingCarousel(movies, _nowPlayingCardHeight(context)),
                   ),
+
                   const SizedBox(height: 24),
 
                   _buildSectionTitle(
@@ -99,17 +98,109 @@ class _HomeTabState extends State<HomeTab> {
                   ),
 
                   const SizedBox(height: 16),
-                  _buildMovieCarousel(
+                  _buildMovieStateWrapper(
                     future: _upcomingFuture,
-                    height: _upcomingCarouselHeight,
-                    highlightCenter: false,
-                    showReleaseDate: true,
+                    height: _upcomingListHeight,
+                    onSuccess: (movies) => _buildUpcomingList(movies),
                   ),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMovieStateWrapper({
+    required Future<List<Movie>> future,
+    required double height,
+    required Widget Function(List<Movie> movies) onSuccess,
+  }) {
+    return FutureBuilder<List<Movie>>(
+      future: future,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return SizedBox(
+            height: height,
+            child: const Center(
+              child: CircularProgressIndicator(color: AppColors.primary),
+            ),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return SizedBox(
+            height: height,
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Text(
+                  'Gagal memuat film.\n${snapshot.error}',
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+                ),
+              ),
+            ),
+          );
+        }
+
+        final movies = snapshot.data ?? [];
+
+        if (movies.isEmpty) {
+          return SizedBox(
+            height: height,
+            child: Center(
+              child: Text(
+                'Belum ada film untuk ditampilkan.',
+                style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+              ),
+            ),
+          );
+        }
+
+        return onSuccess(movies);
+      },
+    );
+  }
+
+  Widget _buildNowPlayingCarousel(List<Movie> movies, double height) {
+    return CarouselSlider.builder(
+      itemCount: movies.length,
+      options: CarouselOptions(
+        height: height,
+        viewportFraction: _highlightViewportFraction,
+        enlargeCenterPage: true,
+        enlargeFactor: _carouselEnlargeFactor,
+        enlargeStrategy: CenterPageEnlargeStrategy.scale,
+        autoPlay: true,
+        padEnds: true,
+      ),
+      itemBuilder: (context, index, realIndex) {
+        return _NowPlayingCard(
+          movie: movies[index],
+          height: height,
+        );
+      },
+    );
+  }
+
+  Widget _buildUpcomingList(List<Movie> movies) {
+    return SizedBox(
+      height: _upcomingListHeight,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: _pagePadding),
+        itemCount: movies.length,
+        separatorBuilder: (context, index) => const SizedBox(width: 14),
+        itemBuilder: (context, index) {
+          return _MovieCarouselCard(
+            movie: movies[index],
+            imageWidth: _plainImageWidth,
+            imageHeight: _plainImageHeight,
+            showReleaseDate: true,
+          );
+        },
       ),
     );
   }
@@ -223,100 +314,6 @@ class _HomeTabState extends State<HomeTab> {
       ),
     );
   }
-
-  Widget _buildMovieCarousel({
-    required Future<List<Movie>> future,
-    required double height,
-    bool highlightCenter = true,
-    bool showReleaseDate = false,
-  }) {
-    return FutureBuilder<List<Movie>>(
-      future: future,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return SizedBox(
-            height: height,
-            child: const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            ),
-          );
-        }
-
-        if (snapshot.hasError) {
-          return SizedBox(
-            height: height,
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text(
-                  'Gagal memuat film.\n${snapshot.error}',
-                  textAlign: TextAlign.center,
-                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
-                ),
-              ),
-            ),
-          );
-        }
-
-        final movies = snapshot.data ?? [];
-
-        if (movies.isEmpty) {
-          return SizedBox(
-            height: height,
-            child: Center(
-              child: Text(
-                'Belum ada film untuk ditampilkan.',
-                style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
-              ),
-            ),
-          );
-        }
-
-        final options = highlightCenter
-            ? CarouselOptions(
-          height: height,
-          viewportFraction: _highlightViewportFraction,
-          enlargeCenterPage: true,
-          enlargeFactor: _carouselEnlargeFactor,
-          enlargeStrategy: CenterPageEnlargeStrategy.scale,
-          autoPlay: true,
-          padEnds: true,
-        )
-            : CarouselOptions(
-          height: height,
-          viewportFraction: _plainViewportFraction,
-          enlargeCenterPage: false,
-          autoPlay: true,
-          padEnds: false,
-        );
-
-        return CarouselSlider.builder(
-          itemCount: movies.length,
-          options: options,
-          itemBuilder: (context, index, realIndex) {
-            if (highlightCenter) {
-              return _NowPlayingCard(
-                movie: movies[index],
-                height: height,
-              );
-            }
-
-            final card = _MovieCarouselCard(
-              movie: movies[index],
-              imageWidth: _plainImageWidth,
-              imageHeight: _plainImageHeight,
-              showReleaseDate: showReleaseDate,
-            );
-
-            return Container(
-              margin: EdgeInsets.only(left: index == 0 ? _pagePadding : 6, right: 6),
-              child: card,
-            );
-          },
-        );
-      },
-    );
-  }
 }
 
 class _NowPlayingCard extends StatelessWidget {
@@ -331,6 +328,12 @@ class _NowPlayingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MovieDetailPage(movie: movie)),
+        );
+      },
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: SizedBox(
@@ -437,6 +440,12 @@ class _MovieCarouselCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MovieDetailPage(movie: movie)),
+        );
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
