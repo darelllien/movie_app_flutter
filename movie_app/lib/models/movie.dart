@@ -23,7 +23,9 @@ class Movie {
     return Movie(
       id: json['id'] ?? 0,
       title: json['title'] ?? 'No Title',
-      overview: json['overview'] ?? 'No Overview Available',
+      overview: (json['overview'] == null || json['overview'].toString().trim().isEmpty) 
+          ? 'Sinopsis belum tersedia.' 
+          : json['overview'],
       posterPath: json['poster_path'] ?? '',
       backdropPath: json['backdrop_path'] ?? '',
       releaseDate: json['release_date'] ?? '-',

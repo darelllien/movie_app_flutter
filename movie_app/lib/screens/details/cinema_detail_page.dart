@@ -11,10 +11,7 @@ import 'package:movie_app/widgets/ticket_buttom_sheet.dart';
 class CinemaDetailPage extends StatefulWidget {
   final Cinema cinema;
 
-  const CinemaDetailPage({
-    super.key,
-    required this.cinema,
-  });
+  const CinemaDetailPage({super.key, required this.cinema});
 
   @override
   State<CinemaDetailPage> createState() => _CinemaDetailPageState();
@@ -32,11 +29,12 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
   Future<List<Movie>> _fetchAndRandomizeMovies() async {
     final apiService = ApiService();
     final movies = await apiService.getNowPlayingMovies();
-    
+
     final random = Random();
     movies.shuffle(random);
-    final count = random.nextInt(3) + 3; // Menghasilkan angka 3, 4, atau 5
-    
+    // Requirement assignment: menampilkan 3-5 film secara acak (random).
+    final count = random.nextInt(3) + 3;
+
     return movies.take(count).toList();
   }
 
@@ -127,7 +125,11 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
               const SizedBox(height: 4),
               Row(
                 children: [
-                  const Icon(Icons.access_time, color: AppColors.textSecondary, size: 16),
+                  const Icon(
+                    Icons.access_time,
+                    color: AppColors.textSecondary,
+                    size: 16,
+                  ),
                   const SizedBox(width: 4),
                   Text(
                     widget.cinema.operatingHours,
@@ -141,7 +143,11 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.location_on, color: AppColors.textSecondary, size: 16),
+                  const Icon(
+                    Icons.location_on,
+                    color: AppColors.textSecondary,
+                    size: 16,
+                  ),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
@@ -175,7 +181,9 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
           return Center(
             child: Text(
               'Gagal memuat film.\n${snapshot.error}',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
           );
@@ -183,7 +191,9 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
           return Center(
             child: Text(
               'Belum ada jadwal tayang.',
-              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           );
         }
