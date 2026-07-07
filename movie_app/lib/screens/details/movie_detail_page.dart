@@ -319,7 +319,7 @@ class MovieDetailPage extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Komponen ini akan dilanjutkan oleh Orang 4 (Spesialis Data & Transaksi).',
+                        'Isi oleh orang 4 (Spesialis Data & Transaksi)',
                         style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
                       ),
                     ),
