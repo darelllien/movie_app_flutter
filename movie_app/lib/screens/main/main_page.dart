@@ -32,10 +32,7 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _tabs,
-      ),
+      body: IndexedStack(index: _selectedIndex, children: _tabs),
 
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
@@ -45,13 +42,18 @@ class _MainPageState extends State<MainPage> {
         selectedItemColor: AppColors.primary,
         unselectedItemColor: AppColors.textSecondary,
 
-        selectedLabelStyle: AppTextStyles.caption.copyWith(fontWeight: FontWeight.bold),
+        selectedLabelStyle: AppTextStyles.caption.copyWith(
+          fontWeight: FontWeight.bold,
+        ),
         unselectedLabelStyle: AppTextStyles.caption,
 
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Beranda'),
           BottomNavigationBarItem(icon: Icon(Icons.movie), label: 'Film'),
-          BottomNavigationBarItem(icon: Icon(Icons.local_movies), label: 'Bioskop'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.local_movies),
+            label: 'Bioskop',
+          ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
         ],
       ),
