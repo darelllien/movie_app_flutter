@@ -4,6 +4,8 @@ import 'package:movie_app/constants/app_text_styles.dart';
 import 'package:movie_app/models/movie.dart';
 import 'package:movie_app/data/dummy_data.dart';
 import 'package:movie_app/models/cinema.dart';
+import 'package:movie_app/widgets/cinema_card.dart';
+import 'package:movie_app/widgets/ticket_buttom_sheet.dart';
 
 class MovieDetailPage extends StatelessWidget {
   final Movie movie;
@@ -195,157 +197,15 @@ class MovieDetailPage extends StatelessWidget {
       itemCount: cinemas.length,
       itemBuilder: (context, index) {
         final cinema = cinemas[index];
-        return _buildCinemaItem(context, cinema);
-      },
-    );
-  }
-
-  Widget _buildCinemaItem(BuildContext context, Cinema cinema) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: Image.network(
-            cinema.logoUrl,
-            width: 50,
-            height: 50,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                width: 50,
-                height: 50,
-                color: AppColors.base,
-                child: const Icon(Icons.movie, color: AppColors.primary),
-              );
-            },
-          ),
-        ),
-        title: Text(
-          cinema.name,
-          style: AppTextStyles.headingSmall.copyWith(color: AppColors.textPrimary),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 4),
-            Text(
-              cinema.operatingHours,
-              style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
-            ),
-          ],
-        ),
-        trailing: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.cta,
-            foregroundColor: AppColors.textOnCta,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-          onPressed: () {
-            _showTicketBottomSheet(context, cinema);
+        return CinemaCard(
+          cinema: cinema,
+          onBuyPressed: () {
+            TicketBottomSheet.show(
+              context,
+              movieTitle: movie.title,
+              cinemaName: cinema.name,
+            );
           },
-          child: Text(
-            'Beli',
-            style: AppTextStyles.button,
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showTicketBottomSheet(BuildContext context, Cinema cinema) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: EdgeInsets.only(
-            left: 16,
-            right: 16,
-            top: 16,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Container(
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Beli Tiket',
-                style: AppTextStyles.headingMedium.copyWith(color: AppColors.primary),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${movie.title} di ${cinema.name}',
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary),
-              ),
-              const SizedBox(height: 24),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: AppColors.base,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.info_outline, color: AppColors.primary),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Komponen ini akan dilanjutkan oleh Orang 4 (Spesialis Data & Transaksi).',
-                        style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    'Tutup',
-                    style: AppTextStyles.button.copyWith(color: AppColors.white),
-                  ),
-                ),
-              ),
-            ],
-          ),
         );
       },
     );
