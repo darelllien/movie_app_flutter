@@ -186,7 +186,7 @@ class _MovieGridCard extends StatelessWidget {
           const SizedBox(height: 10),
 
           Text(
-            Formatters.truncateTitle(movie.title),
+            Formatters.truncateTitle(movie.title, maxLength: 25, truncateLength: 22),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: AppTextStyles.bodyMedium.copyWith(
