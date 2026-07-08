@@ -32,7 +32,7 @@ class OnboardingScreen extends StatelessWidget {
               Icon(Icons.theaters, size: 120, color: theme.colorScheme.primary),
               const SizedBox(height: 32),
               Text(
-                'Selamat Datang di Cinema App',
+                'Selamat Datang di Movie App',
                 style: theme.textTheme.titleLarge?.copyWith(color: theme.colorScheme.primary),
                 textAlign: TextAlign.center,
               ),
