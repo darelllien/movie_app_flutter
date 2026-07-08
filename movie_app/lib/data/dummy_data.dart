@@ -93,4 +93,90 @@ class DummyData {
       operatingHours: '10:00 - 22:00',
     ),
   ];
+
+  static final List<Map<String, String>> movieCast = [
+    {'image': 'https://randomuser.me/api/portraits/men/32.jpg', 'name': 'Tom Hanks', 'role': 'Woody (voice)'},
+    {'image': 'https://randomuser.me/api/portraits/women/44.jpg', 'name': 'Joan Cusack', 'role': 'Jessie (voice)'},
+    {'image': 'https://randomuser.me/api/portraits/men/46.jpg', 'name': 'Tim Allen', 'role': 'Buzz (voice)'},
+    {'image': 'https://randomuser.me/api/portraits/men/22.jpg', 'name': 'Don Rickles', 'role': 'Mr. Potato'},
+    {'image': 'https://randomuser.me/api/portraits/women/12.jpg', 'name': 'Annie Potts', 'role': 'Bo Peep'},
+  ];
+
+  static final Map<String, String> movieCrew = {
+    'Sutradara': 'Andrew Stanton',
+    'Produser': 'Jessica Choi, Lindsey Collins',
+  };
+
+  static final List<Map<String, dynamic>> cinemaSchedules = [
+    {
+      'cinemaName': 'AEON MALL JGC CGV',
+      'type': 'REGULAR 2D',
+      'price': 'Rp47.000 - Rp52.000',
+      'showtimes': ['13:00', '14:20', '15:30', '16:50', '17:50', '19:10', '20:30'],
+      'brand': 'CGV',
+    },
+    {
+      'cinemaName': 'GRAND METROPOLITAN XXI',
+      'type': '2D',
+      'price': 'Rp50.000 - Rp60.000',
+      'showtimes': ['12:15', '13:45', '14:30', '16:00', '18:15'],
+      'brand': 'XXI',
+    },
+    {
+      'cinemaName': 'MEGA BEKASI XXI',
+      'type': '2D',
+      'price': 'Rp40.000 - Rp50.000',
+      'showtimes': ['11:00', '12:30', '13:45', '15:15', '16:30', '17:45', '19:00', '20:15', '21:30'],
+      'brand': 'XXI',
+    },
+    {
+      'cinemaName': 'KOTA KASABLANKA XXI',
+      'type': 'PREMIERE',
+      'price': 'Rp45.000',
+      'showtimes': ['13:10', '15:40', '18:10', '20:40'],
+      'brand': 'XXI',
+    },
+    {
+      'cinemaName': 'PLAZA INDONESIA XXI',
+      'type': 'PREMIERE',
+      'price': 'Rp150.000',
+      'showtimes': ['12:00', '14:30', '17:00', '19:30', '21:00'],
+      'brand': 'XXI',
+    },
+    {
+      'cinemaName': 'GRAND INDONESIA CGV',
+      'type': 'STARIUM 2D',
+      'price': 'Rp60.000',
+      'showtimes': ['11:30', '13:50', '15:10', '17:40', '19:10', '20:30', '21:50'],
+      'brand': 'CGV',
+    },
+    {
+      'cinemaName': 'KELAPA GADING XXI',
+      'type': 'IMAX 2D',
+      'price': 'Rp75.000 - Rp100.000',
+      'showtimes': ['12:45', '15:15', '17:45', '20:15'],
+      'brand': 'XXI',
+    },
+    {
+      'cinemaName': 'PONDOK INDAH 2 XXI',
+      'type': '2D',
+      'price': 'Rp55.000',
+      'showtimes': ['12:15', '14:00', '15:45', '17:30', '19:15', '21:00'],
+      'brand': 'XXI',
+    },
+    {
+      'cinemaName': 'CENTRAL PARK CGV',
+      'type': '4DX 2D',
+      'price': 'Rp120.000 - Rp150.000',
+      'showtimes': ['11:10', '13:20', '15:30', '17:40', '19:50', '22:00'],
+      'brand': 'CGV',
+    },
+    {
+      'cinemaName': 'SENAYAN CITY XXI',
+      'type': 'PREMIERE',
+      'price': 'Rp150.000 - Rp250.000',
+      'showtimes': ['13:00', '15:30', '18:00', '20:30'],
+      'brand': 'XXI',
+    }
+  ];
 }

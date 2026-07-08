@@ -23,6 +23,22 @@ class ApiService {
     return _fetchMovieList(url);
   }
 
+  Future<Map<String, dynamic>> getMovieCredits(int movieId) async {
+    if (_token.isEmpty) {
+      throw Exception('API Token tidak ditemukan! Periksa kembali file .env Anda.');
+    }
+    final url = Uri.parse('$baseUrl/movie/$movieId/credits');
+    final response = await http.get(url, headers: {
+      'Authorization': 'Bearer $_token',
+      'Accept': 'application/json',
+    });
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Gagal memuat data credits dari TMDB');
+    }
+  }
+
   Future<List<Movie>> _fetchMovieList(Uri url) async {
     if (_token.isEmpty) {
       throw Exception(
