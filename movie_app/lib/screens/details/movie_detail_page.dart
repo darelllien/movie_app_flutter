@@ -22,6 +22,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   late DateTime _selectedDate = _baseDate;
   String? _selectedCinemaName;
   String? _selectedShowtime;
+  String _selectedCity = 'BEKASI';
 
   List<Map<String, String>> _cast = [];
   String _director = 'Memuat...';
@@ -554,93 +555,49 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
         ),
         const SizedBox(height: 24),
 
-        // SEARCH & FILTER
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        // CITY DROPDOWN
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            border: Border.symmetric(
+              horizontal: BorderSide(color: Colors.grey[300]!, width: 1),
+            ),
+          ),
           child: Row(
             children: [
+              Icon(Icons.location_on, color: Colors.grey[500]),
+              const SizedBox(width: 12),
               Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                height: 45,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.grey[300]!),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.search, color: Colors.grey[400]),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Cari bioskop',
-                          hintStyle: TextStyle(color: Colors.grey[400]),
-                          border: InputBorder.none,
-                          isDense: true,
-                        ),
-                      ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    isDense: true,
+                    isExpanded: true,
+                    value: _selectedCity,
+                    icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey[500]),
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textPrimary,
+                      fontSize: 16,
                     ),
-                  ],
+                    items: ['JAKARTA', 'BOGOR', 'DEPOK', 'TANGERANG', 'BEKASI', 'CIREBON'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedCity = newValue;
+                        });
+                      }
+                    },
+                  ),
                 ),
               ),
-            ),
-            PopupMenuButton<String>(
-              onSelected: (String result) {
-                // Implement city filter logic
-              },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(
-                  value: 'Semua Kota',
-                  child: Text('Semua Kota'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Jakarta',
-                  child: Text('Jakarta'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Bogor',
-                  child: Text('Bogor'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Depok',
-                  child: Text('Depok'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Tangerang',
-                  child: Text('Tangerang'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'Bekasi',
-                  child: Text('Bekasi'),
-                ),
-              ],
-              child: Container(
-                height: 45,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.grey[300]!),
-                  borderRadius: BorderRadius.circular(24),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.tune, color: AppColors.primary, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Filter',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: AppColors.textPrimary,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
+            ],
+          ),
         ),
         const SizedBox(height: 24),
 
