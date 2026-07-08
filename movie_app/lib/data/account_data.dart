@@ -5,6 +5,35 @@ class AccountData {
   static const String _usersKey = 'users_list';
   static const String _currentUserKey = 'current_user';
 
+  // --- TAMBAHKAN FUNGSI INI ---
+  /// Menginisialisasi akun admin jika belum ada di database lokal
+  static Future<void> initializeAdmin() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> usersStr = prefs.getStringList(_usersKey) ?? [];
+
+    // Cek apakah akun admin sudah terdaftar
+    bool adminExists = false;
+    for (String userStr in usersStr) {
+      Map<String, dynamic> user = jsonDecode(userStr);
+      if (user['email'] == 'admin123@gmail.com') {
+        adminExists = true;
+        break;
+      }
+    }
+
+    // Jika admin belum ada, masukkan ke dalam daftar akun
+    if (!adminExists) {
+      Map<String, dynamic> adminUser = {
+        'name': 'admin',
+        'email': 'admin123@gmail.com',
+        'password': '123456',
+      };
+      usersStr.add(jsonEncode(adminUser));
+      await prefs.setStringList(_usersKey, usersStr);
+      print('Akun admin default berhasil dibuat!'); // Hanya untuk pengecekan di terminal
+    }
+  }
+
   /// Mendaftarkan pengguna baru.
   /// Mengembalikan [true] jika berhasil, [false] jika email sudah terdaftar.
   static Future<bool> registerUser(String name, String email, String password) async {

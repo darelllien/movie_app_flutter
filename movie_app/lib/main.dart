@@ -5,11 +5,14 @@ import 'screens/auth/splash_screen.dart';
 // import 'screens/main/main_page.dart';
 import 'constants/app_color.dart';
 import 'constants/app_text_styles.dart';
+import 'data/account_data.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load(fileName: ".env");
+
+  await AccountData.initializeAdmin();
 
   runApp(const MyApp());
 }
