@@ -16,17 +16,27 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 0;
 
-  final List<Widget> _tabs = [
-    const HomeTab(),
+  // 1. BUAT GLOBAL KEY UNTUK MENGONTROL STATE HOMETAB DARI LUAR
+  final GlobalKey<HomeTabState> _homeTabKey = GlobalKey<HomeTabState>();
+
+  // 2. DAFTARKAN TABS (Hapus kata 'const' di depan HomeTab agar bisa dipasang key)
+  late final List<Widget> _tabs = [
+    HomeTab(key: _homeTabKey), // Pasang key kontrol di sini
     const MovieListTab(),
     const CinemaListTab(),
     const ProfileTab(),
   ];
 
+  // 3. JEMBATAN REFRESH SAAT TAB DIKLIK
   void _onTabTapped(int index) {
     setState(() {
       _selectedIndex = index;
     });
+
+    // Jika user mengklik tab Beranda (indeks 0), tembak fungsi refresh secara paksa
+    if (index == 0) {
+      _homeTabKey.currentState?.loadUserNameExternal();
+    }
   }
 
   @override

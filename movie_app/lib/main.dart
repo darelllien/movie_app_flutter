@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:movie_app/screens/auth/splash_screen.dart';
-import 'screens/auth/splash_screen.dart';
-// import 'screens/main/main_page.dart';
 import 'constants/app_color.dart';
 import 'constants/app_text_styles.dart';
 import 'data/account_data.dart';

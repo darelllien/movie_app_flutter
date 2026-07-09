@@ -9,6 +9,8 @@ class TransactionModel {
   final int pricePerTicket;
   final DateTime transactionDate;
   final String seatNumbers;
+  final String paymentMethod;
+  bool isScanned;
 
   TransactionModel({
     required this.id,
@@ -18,6 +20,8 @@ class TransactionModel {
     required this.pricePerTicket,
     required this.transactionDate,
     required this.seatNumbers,
+    required this.paymentMethod,
+    this.isScanned = false,
   });
 
   int get totalPrice => ticketCount * pricePerTicket;
@@ -32,9 +36,17 @@ class TransactionState {
   TransactionState._internal();
 
   final List<TransactionModel> _history = [];
-  List<TransactionModel> get history => List.unmodifiable(_history);
+
+  List<TransactionModel> get history => _history;
 
   void addTransaction(TransactionModel transaction) {
     _history.insert(0, transaction);
+  }
+
+  void markAsScanned(String txId) {
+    final index = _history.indexWhere((tx) => tx.id == txId);
+    if (index != -1) {
+      _history[index].isScanned = true;
+    }
   }
 }

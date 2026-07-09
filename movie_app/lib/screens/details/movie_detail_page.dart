@@ -39,19 +39,27 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
     try {
       final api = ApiService();
       final credits = await api.getMovieCredits(widget.movie.id);
-      
+
       final castData = credits['cast'] as List;
       final parsedCast = castData.take(10).map((c) {
         return {
-          'image': c['profile_path'] != null ? 'https://image.tmdb.org/t/p/w200${c['profile_path']}' : '',
+          'image': c['profile_path'] != null
+              ? 'https://image.tmdb.org/t/p/w200${c['profile_path']}'
+              : '',
           'name': c['name'].toString(),
           'role': c['character'].toString(),
         };
       }).toList();
 
       final crewData = credits['crew'] as List;
-      final directorNode = crewData.firstWhere((c) => c['job'] == 'Director', orElse: () => {'name': '-'});
-      final producers = crewData.where((c) => c['job'] == 'Producer').map((c) => c['name']).toList();
+      final directorNode = crewData.firstWhere(
+        (c) => c['job'] == 'Director',
+        orElse: () => {'name': '-'},
+      );
+      final producers = crewData
+          .where((c) => c['job'] == 'Producer')
+          .map((c) => c['name'])
+          .toList();
 
       if (mounted) {
         setState(() {
@@ -74,8 +82,18 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
 
   String _getMonthName(int month) {
     const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agu',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
     ];
     return months[month - 1];
   }
@@ -87,10 +105,8 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Membatasi maksimal 2 genre
     final genres = widget.movie.genreNames.split(', ').take(2).toList();
-    
-    // Mengecek apakah tombol beli tiket aktif
+
     final isTicketActive = !_isSynopsisTab && _selectedShowtime != null;
 
     return Scaffold(
@@ -99,7 +115,6 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // HEADER (Backdrop + Poster + Title)
             Stack(
               clipBehavior: Clip.none,
               children: [
@@ -149,7 +164,11 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                   top: MediaQuery.of(context).padding.top + 8,
                   left: 8,
                   child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
+                    icon: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 28,
+                    ),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
@@ -178,7 +197,10 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                           width: 110,
                           height: 160,
                           color: AppColors.primary,
-                          child: const Icon(Icons.broken_image, color: AppColors.white),
+                          child: const Icon(
+                            Icons.broken_image,
+                            color: AppColors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -193,7 +215,11 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                     children: [
                       Row(
                         children: [
-                          const Icon(Icons.star, color: AppColors.cta, size: 18),
+                          const Icon(
+                            Icons.star,
+                            color: AppColors.cta,
+                            size: 18,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             widget.movie.voteAverage.toStringAsFixed(1),
@@ -225,7 +251,9 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              border: Border.all(color: AppColors.textSecondary),
+                              border: Border.all(
+                                color: AppColors.textSecondary,
+                              ),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Text(
@@ -242,8 +270,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                 ),
               ],
             ),
-            
-            // Jarak untuk ruang poster yang menjulur (130) + 16 padding
+
             const SizedBox(height: 146),
 
             // TABS
@@ -256,56 +283,64 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               ),
               child: Row(
                 children: [
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _isSynopsisTab = true),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: _isSynopsisTab ? AppColors.primary : Colors.grey[300]!,
-                            width: 2,
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _isSynopsisTab = true),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: _isSynopsisTab
+                                  ? AppColors.primary
+                                  : Colors.grey[300]!,
+                              width: 2,
+                            ),
                           ),
                         ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'SINOPSIS',
-                          style: AppTextStyles.headingSmall.copyWith(
-                            color: _isSynopsisTab ? AppColors.primary : Colors.grey,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => setState(() => _isSynopsisTab = false),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          bottom: BorderSide(
-                            color: !_isSynopsisTab ? AppColors.primary : Colors.grey[300]!,
-                            width: 2,
-                          ),
-                        ),
-                      ),
-                      child: Center(
-                        child: Text(
-                          'JADWAL',
-                          style: AppTextStyles.headingSmall.copyWith(
-                            color: !_isSynopsisTab ? AppColors.primary : Colors.grey,
+                        child: Center(
+                          child: Text(
+                            'SINOPSIS',
+                            style: AppTextStyles.headingSmall.copyWith(
+                              color: _isSynopsisTab
+                                  ? AppColors.primary
+                                  : Colors.grey,
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _isSynopsisTab = false),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        decoration: BoxDecoration(
+                          border: Border(
+                            bottom: BorderSide(
+                              color: !_isSynopsisTab
+                                  ? AppColors.primary
+                                  : Colors.grey[300]!,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'JADWAL',
+                            style: AppTextStyles.headingSmall.copyWith(
+                              color: !_isSynopsisTab
+                                  ? AppColors.primary
+                                  : Colors.grey,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
 
             // CONTENT
@@ -330,8 +365,12 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
           ),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: isTicketActive ? AppColors.cta : Colors.grey[400],
-              foregroundColor: isTicketActive ? AppColors.textOnCta : Colors.white,
+              backgroundColor: isTicketActive
+                  ? AppColors.cta
+                  : Colors.grey[400],
+              foregroundColor: isTicketActive
+                  ? AppColors.textOnCta
+                  : Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -340,10 +379,15 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
             ),
             onPressed: isTicketActive
                 ? () {
+                    String formattedDateStr =
+                        "${_selectedDate.day} ${_getMonthName(_selectedDate.month)}";
+
                     TicketBottomSheet.show(
                       context,
                       movieTitle: widget.movie.title,
                       cinemaName: _selectedCinemaName ?? 'Bioskop',
+                      selectedDate: formattedDateStr,
+                      selectedTime: _selectedShowtime!,
                     );
                   }
                 : null,
@@ -365,126 +409,136 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 16),
-        // OVERVIEW
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            (widget.movie.overview.isEmpty || widget.movie.overview.toLowerCase().contains('belum tersedia'))
-                ? 'Film fiksi fana yang mengisahkan sebuah petualangan seru penuh dengan drama, aksi, dan intrik yang memukau. Para karakter akan dibawa ke dalam petualangan emosional dalam menghadapi berbagai konflik batin serta tantangan hidup yang tak terduga untuk mencapai tujuan akhir mereka. Karya sinematik ini menyajikan visual yang indah dan alur cerita yang sangat tidak bisa ditebak.' 
-                : widget.movie.overview,
-            style: AppTextStyles.bodyMedium.copyWith(
-              color: AppColors.textPrimary,
-              height: 1.5,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              (widget.movie.overview.isEmpty ||
+                      widget.movie.overview.toLowerCase().contains(
+                        'belum tersedia',
+                      ))
+                  ? 'Film fiksi fana yang mengisahkan sebuah petualangan seru penuh dengan drama, aksi, dan intrik yang memukau. Para karakter akan dibawa ke dalam petualangan emosional dalam menghadapi berbagai konflik batin serta tantangan hidup yang tak terduga untuk mencapai tujuan akhir mereka. Karya sinematik ini menyajikan visual yang indah dan alur cerita yang sangat tidak bisa ditebak.'
+                  : widget.movie.overview,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textPrimary,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.justify,
             ),
-            textAlign: TextAlign.justify,
           ),
-        ),
-        const SizedBox(height: 24),
-        
-        // CREW (Producer & Director)
-        const Divider(height: 1),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Produser', style: AppTextStyles.headingSmall),
-              const SizedBox(height: 4),
-              Text(
-                _producer,
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 16),
-              Text('Sutradara', style: AppTextStyles.headingSmall),
-              const SizedBox(height: 4),
-              Text(
-                _director,
-                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        const Divider(height: 1),
-        const SizedBox(height: 24),
+          const SizedBox(height: 24),
 
-        // TOP CAST
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Text(
-            'Pemeran',
-            style: AppTextStyles.headingMedium.copyWith(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.bold,
+          // CREW (Producer & Director)
+          const Divider(height: 1),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Produser', style: AppTextStyles.headingSmall),
+                const SizedBox(height: 4),
+                Text(
+                  _producer,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text('Sutradara', style: AppTextStyles.headingSmall),
+                const SizedBox(height: 4),
+                Text(
+                  _director,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-        const SizedBox(height: 16),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: SizedBox(
-          height: 180,
-          child: _isLoadingCredits
-              ? const Center(child: CircularProgressIndicator())
-              : _cast.isEmpty
+          const SizedBox(height: 16),
+          const Divider(height: 1),
+          const SizedBox(height: 24),
+
+          // TOP CAST
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              'Pemeran',
+              style: AppTextStyles.headingMedium.copyWith(
+                color: AppColors.textPrimary,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: SizedBox(
+              height: 180,
+              child: _isLoadingCredits
+                  ? const Center(child: CircularProgressIndicator())
+                  : _cast.isEmpty
                   ? const Center(child: Text('Data pemeran belum tersedia.'))
                   : ListView.builder(
                       scrollDirection: Axis.horizontal,
                       itemCount: _cast.length,
                       itemBuilder: (context, index) {
                         final cast = _cast[index];
-              return Container(
-                width: 90,
-                margin: const EdgeInsets.only(right: 16),
-                child: Column(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
-                      child: Image.network(
-                        cast['image']!,
-                        width: 90,
-                        height: 110,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, err, stack) => Container(
+                        return Container(
                           width: 90,
-                          height: 110,
-                          color: Colors.grey[300],
-                          child: const Icon(Icons.person, color: Colors.grey),
-                        ),
-                      ),
+                          margin: const EdgeInsets.only(right: 16),
+                          child: Column(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.network(
+                                  cast['image']!,
+                                  width: 90,
+                                  height: 110,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, err, stack) =>
+                                      Container(
+                                        width: 90,
+                                        height: 110,
+                                        color: Colors.grey[300],
+                                        child: const Icon(
+                                          Icons.person,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                cast['name']!,
+                                style: AppTextStyles.bodySmall.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                cast['role']!,
+                                style: AppTextStyles.caption.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                                textAlign: TextAlign.center,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      cast['name']!,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      cast['role']!,
-                      style: AppTextStyles.caption.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                      textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              );
-            },
+            ),
           ),
-        ),
-        ),
-        const SizedBox(height: 24),
-      ],
-    ),
+          const SizedBox(height: 24),
+        ],
+      ),
     );
   }
 
@@ -492,66 +546,74 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // DATE PICKER
         Container(
           color: Colors.white,
           padding: const EdgeInsets.only(top: 16.0, bottom: 16.0),
           child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: SizedBox(
-          height: 70,
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: 7,
-            itemBuilder: (context, index) {
-              final date = _baseDate.add(Duration(days: index));
-              final isSelected = date.day == _selectedDate.day && date.month == _selectedDate.month;
-              
-              String dayLabel = (index == 0) ? 'HARI INI' : _getDayName(date.weekday);
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: SizedBox(
+              height: 70,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: 7,
+                itemBuilder: (context, index) {
+                  final date = _baseDate.add(Duration(days: index));
+                  final isSelected =
+                      date.day == _selectedDate.day &&
+                      date.month == _selectedDate.month;
 
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    _selectedDate = date;
-                    // Reset selected showtime when date changes
-                    _selectedShowtime = null;
-                  });
-                },
-                child: Container(
-                  width: 80,
-                  margin: const EdgeInsets.only(right: 12),
-                  decoration: BoxDecoration(
-                    color: isSelected ? AppColors.primary : Colors.white,
-                    border: Border.all(
-                      color: isSelected ? AppColors.primary : Colors.grey[300]!,
+                  String dayLabel = (index == 0)
+                      ? 'HARI INI'
+                      : _getDayName(date.weekday);
+
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        _selectedDate = date;
+                        _selectedShowtime = null;
+                      });
+                    },
+                    child: Container(
+                      width: 80,
+                      margin: const EdgeInsets.only(right: 12),
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppColors.primary : Colors.white,
+                        border: Border.all(
+                          color: isSelected
+                              ? AppColors.primary
+                              : Colors.grey[300]!,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            '${date.day.toString().padLeft(2, '0')} ${_getMonthName(date.month)}',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: isSelected
+                                  ? Colors.white
+                                  : AppColors.textPrimary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            dayLabel,
+                            style: AppTextStyles.caption.copyWith(
+                              color: isSelected
+                                  ? Colors.white
+                                  : AppColors.textSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '${date.day.toString().padLeft(2, '0')} ${_getMonthName(date.month)}',
-                        style: AppTextStyles.bodyMedium.copyWith(
-                          color: isSelected ? Colors.white : AppColors.textPrimary,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        dayLabel,
-                        style: AppTextStyles.caption.copyWith(
-                          color: isSelected ? Colors.white : AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
+                  );
+                },
+              ),
+            ),
           ),
-        ),
-        ),
         ),
         const SizedBox(height: 24),
 
@@ -575,17 +637,28 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                     isDense: true,
                     isExpanded: true,
                     value: _selectedCity,
-                    icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey[500]),
+                    icon: Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Colors.grey[500],
+                    ),
                     style: AppTextStyles.bodyMedium.copyWith(
                       color: AppColors.textPrimary,
                       fontSize: 16,
                     ),
-                    items: ['JAKARTA', 'BOGOR', 'DEPOK', 'TANGERANG', 'BEKASI', 'CIREBON'].map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
-                      );
-                    }).toList(),
+                    items:
+                        [
+                          'JAKARTA',
+                          'BOGOR',
+                          'DEPOK',
+                          'TANGERANG',
+                          'BEKASI',
+                          'CIREBON',
+                        ].map((String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        }).toList(),
                     onChanged: (newValue) {
                       if (newValue != null) {
                         setState(() {
@@ -601,8 +674,9 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
         ),
         const SizedBox(height: 24),
 
-        // CINEMA SCHEDULES (Max 5)
-        ...DummyData.cinemaSchedules.take(5).toList().asMap().entries.map((entry) {
+        ...DummyData.cinemaSchedules.take(5).toList().asMap().entries.map((
+          entry,
+        ) {
           final int index = entry.key;
           final cinema = entry.value;
           return CinemaScheduleCard(
@@ -612,7 +686,8 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
             isFirst: index == 0,
             onShowtimeSelected: (cinemaName, showtime) {
               setState(() {
-                if (_selectedCinemaName == cinemaName && _selectedShowtime == showtime) {
+                if (_selectedCinemaName == cinemaName &&
+                    _selectedShowtime == showtime) {
                   _selectedCinemaName = null;
                   _selectedShowtime = null;
                 } else {
@@ -621,9 +696,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                 }
               });
             },
-            onViewMore: () {
-              // Handle view more schedules action
-            },
+            onViewMore: () {},
           );
         }),
       ],
