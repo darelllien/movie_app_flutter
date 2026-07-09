@@ -6,6 +6,7 @@ import 'package:movie_app/widgets/ticket_buttom_sheet.dart';
 import 'package:movie_app/data/dummy_data.dart';
 import 'package:movie_app/services/api_services.dart';
 import 'package:movie_app/widgets/cinema_schedule_card.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MovieDetailPage extends StatefulWidget {
   final Movie movie;
@@ -17,6 +18,7 @@ class MovieDetailPage extends StatefulWidget {
 }
 
 class _MovieDetailPageState extends State<MovieDetailPage> {
+  final ApiService _apiService = ApiService();
   bool _isSynopsisTab = true;
   final DateTime _baseDate = DateTime(2026, 7, 10);
   late DateTime _selectedDate = _baseDate;
@@ -36,6 +38,35 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   void initState() {
     super.initState();
     _fetchCredits();
+  }
+
+  Future<void> _playTrailer() async {
+    final url = await _apiService.getMovieTrailer(widget.movie.id);
+    if (url != null) {
+      final uri = Uri.parse(url);
+      try {
+        final launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+        if (!launched) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Tidak dapat memutar trailer')),
+            );
+          }
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Aplikasi browser tidak ditemukan')),
+          );
+        }
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Trailer tidak tersedia')),
+        );
+      }
+    }
   }
 
   Future<void> _fetchCredits() async {
@@ -175,13 +206,16 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                         ),
                       ),
                       Center(
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.3),
+                        child: GestureDetector(
+                          onTap: _playTrailer,
+                          child: Container(
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withValues(alpha: 0.3),
+                            ),
+                            padding: const EdgeInsets.all(12),
+                            child: const Icon(Icons.play_arrow, color: Colors.white, size: 40),
                           ),
-                          padding: const EdgeInsets.all(12),
-                          child: const Icon(Icons.play_arrow, color: Colors.white, size: 40),
                         ),
                       ),
                     ],
