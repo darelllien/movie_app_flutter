@@ -7,7 +7,7 @@ import 'package:movie_app/screens/main/widgets/daftar_transaksi_tab.dart';
 import 'package:movie_app/screens/main/widgets/edit_profile_page.dart';
 
 import '../../data/account_data.dart';
-import '../auth/login_page.dart';
+import '../../routes/app_routes.dart';
 
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
@@ -44,10 +44,10 @@ class _ProfileTabState extends State<ProfileTab> {
   void _logout() async {
     await AccountData.logout();
     if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
+    Navigator.pushNamedAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (route) => false,
+      AppRoutes.login,
+          (route) => false,
     );
   }
 

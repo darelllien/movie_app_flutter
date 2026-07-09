@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:movie_app/data/account_data.dart'; // Pastikan path import sesuai
+import 'package:movie_app/data/account_data.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -15,7 +15,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
 
   void _register() async {
-    // Jalankan validasi form terlebih dahulu
     if (_formKey.currentState!.validate()) {
       bool isSuccess = await AccountData.registerUser(
         _nameController.text.trim(),
@@ -29,7 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Pendaftaran berhasil! Silakan login.')),
         );
-        Navigator.pop(context); // Kembali ke halaman login
+        Navigator.pop(context, true);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Email sudah terdaftar! Gunakan email lain.')),
@@ -61,7 +60,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Text('Daftar Akun', style: theme.textTheme.displayLarge, textAlign: TextAlign.center),
                   const SizedBox(height: 32),
 
-                  // Field Nama
                   TextFormField(
                     controller: _nameController,
                     decoration: InputDecoration(
@@ -74,7 +72,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 16),
 
-                  // Field Email dengan Regex Validation
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
