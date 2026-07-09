@@ -4,6 +4,7 @@ import '../../models/movie.dart';
 import '../../constants/app_color.dart';
 import '../../constants/app_text_styles.dart';
 import '../../utils/formatters.dart';
+import '../../screens/details/movie_detail_page.dart';
 
 enum MovieListType { nowPlaying, upcoming }
 
@@ -155,6 +156,12 @@ class _MovieGridCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MovieDetailPage(movie: movie)),
+        );
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
