@@ -10,18 +10,24 @@ class ApiService {
   final String _token = dotenv.maybeGet('TMDB_TOKEN') ?? '';
 
   Future<List<Movie>> getNowPlayingMovies() async {
-    final url = Uri.parse('$baseUrl/movie/now_playing?language=id-ID&page=1&with_original_language=en|id');
+    final url = Uri.parse(
+      '$baseUrl/movie/now_playing?language=id-ID&page=1&with_original_language=en|id',
+    );
     return _fetchMovieList(url);
   }
 
   Future<List<Movie>> getUpcomingMovies() async {
-    final url = Uri.parse('$baseUrl/movie/upcoming?language=id-ID&page=1&with_original_language=en|id');
+    final url = Uri.parse(
+      '$baseUrl/movie/upcoming?language=id-ID&page=1&with_original_language=en|id',
+    );
     return _fetchMovieList(url);
   }
 
   Future<List<Movie>> searchMovies(String query) async {
     if (query.isEmpty) return [];
-    final url = Uri.parse('$baseUrl/search/movie?query=$query&language=id-ID&page=1');
+    final url = Uri.parse(
+      '$baseUrl/search/movie?query=$query&language=id-ID&page=1',
+    );
     return _fetchMovieList(url);
   }
 
@@ -32,13 +38,18 @@ class ApiService {
 
   Future<Map<String, dynamic>> getMovieCredits(int movieId) async {
     if (_token.isEmpty) {
-      throw Exception('API Token tidak ditemukan! Periksa kembali file .env Anda.');
+      throw Exception(
+        'API Token tidak ditemukan! Periksa kembali file .env Anda.',
+      );
     }
     final url = Uri.parse('$baseUrl/movie/$movieId/credits');
-    final response = await http.get(url, headers: {
-      'Authorization': 'Bearer $_token',
-      'Accept': 'application/json',
-    });
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $_token',
+        'Accept': 'application/json',
+      },
+    );
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else {
@@ -49,27 +60,68 @@ class ApiService {
   Future<String?> getMovieTrailer(int movieId) async {
     if (_token.isEmpty) return null;
 
-    final url = Uri.parse('$baseUrl/movie/$movieId/videos');
+    final url = Uri.parse('$baseUrl/movie/$movieId/videos?language=en-US');
+
     try {
-      final response = await http.get(url, headers: {
-        'Authorization': 'Bearer $_token',
-        'Accept': 'application/json',
-      });
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final List results = data['results'] ?? [];
-        final trailer = results.firstWhere(
-          (v) => v['type'] == 'Trailer' && v['site'] == 'YouTube',
-          orElse: () => null,
-        );
-        if (trailer != null) {
-          return 'https://www.youtube.com/watch?v=${trailer['key']}';
-        }
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $_token',
+          'Accept': 'application/json',
+        },
+      );
+
+      if (response.statusCode != 200) {
+        return null;
       }
+
+      final data = json.decode(response.body);
+      final List videos = data['results'] ?? [];
+
+      if (videos.isEmpty) return null;
+
+      debugPrint("===== VIDEO LIST =====");
+      for (final v in videos) {
+        debugPrint(
+          "${v['name']} | ${v['type']} | ${v['official']} | ${v['site']} | ${v['key']}",
+        );
+      }
+
+      final officialTrailer = videos.cast<Map<String, dynamic>?>().firstWhere(
+        (v) =>
+            v?['site'] == 'YouTube' &&
+            v?['type'] == 'Trailer' &&
+            v?['official'] == true,
+        orElse: () => null,
+      );
+
+      if (officialTrailer != null) {
+        return officialTrailer['key'];
+      }
+
+      final trailer = videos.cast<Map<String, dynamic>?>().firstWhere(
+        (v) => v?['site'] == 'YouTube' && v?['type'] == 'Trailer',
+        orElse: () => null,
+      );
+
+      if (trailer != null) {
+        return trailer['key'];
+      }
+
+      final teaser = videos.cast<Map<String, dynamic>?>().firstWhere(
+        (v) => v?['site'] == 'YouTube' && v?['type'] == 'Teaser',
+        orElse: () => null,
+      );
+
+      if (teaser != null) {
+        return teaser['key'];
+      }
+
+      return null;
     } catch (e) {
-      debugPrint('Error fetching trailer: $e');
+      debugPrint(e.toString());
+      return null;
     }
-    return null;
   }
 
   Future<List<Movie>> _fetchMovieList(Uri url) async {

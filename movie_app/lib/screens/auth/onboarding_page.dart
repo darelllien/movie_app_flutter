@@ -17,17 +17,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     {
       "icon": Icons.movie_filter_rounded,
       "title": "Temukan Film Favoritmu",
-      "desc": "Jelajahi ribuan film terbaru dan klasik, semuanya ada dalam genggamanmu. Jangan ketinggalan hype-nya!",
+      "desc":
+          "Jelajahi ribuan film terbaru dan klasik, semuanya ada dalam genggamanmu. Jangan ketinggalan hype-nya!",
     },
     {
       "icon": Icons.event_seat_rounded,
       "title": "Pesan Tiket Tanpa Antre",
-      "desc": "Pilih kursi terbaikmu, pesan tiket kapan saja, dan langsung masuk bioskop tanpa perlu antre di loket.",
+      "desc":
+          "Pilih kursi terbaikmu, pesan tiket kapan saja, dan langsung masuk bioskop tanpa perlu antre di loket.",
     },
     {
       "icon": Icons.location_on_rounded,
       "title": "Info Bioskop Terdekat",
-      "desc": "Movix tahu bioskop mana yang paling dekat denganmu. Dapatkan jadwal tayang akurat setiap saat.",
+      "desc":
+          "Movix tahu bioskop mana yang paling dekat denganmu. Dapatkan jadwal tayang akurat setiap saat.",
     },
   ];
 
@@ -85,10 +88,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-
                         Container(
                           padding: const EdgeInsets.all(32),
                           decoration: BoxDecoration(
+                            // ignore: deprecated_member_use
                             color: theme.colorScheme.primary.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
@@ -127,46 +130,48 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
 
-        Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: SizedBox(
-            height: 50,
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
+            Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: SizedBox(
+                height: 50,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List.generate(
+                        onboardingData.length,
+                        (index) => buildDotIndicator(index, theme),
+                      ),
+                    ),
 
-              Row(
-              mainAxisSize: MainAxisSize.min,
-              children: List.generate(
-                onboardingData.length,
-                    (index) => buildDotIndicator(index, theme),
-              ),
-            ),
-
-            // Tombol "Selanjutnya" atau "Mulai Sekarang"
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (_currentPage == onboardingData.length - 1) {
-                    _finishOnboarding();
-                  } else {
-                    _pageController.nextPage(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOut,
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                child: Text(
-                  _currentPage == onboardingData.length - 1
-                      ? 'Mulai'
-                      : 'Lanjut',
+                    // Tombol "Selanjutnya" atau "Mulai Sekarang"
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_currentPage == onboardingData.length - 1) {
+                            _finishOnboarding();
+                          } else {
+                            _pageController.nextPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 12,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                        ),
+                        child: Text(
+                          _currentPage == onboardingData.length - 1
+                              ? 'Mulai'
+                              : 'Lanjut',
                         ),
                       ),
                     ),
@@ -175,11 +180,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
           ],
-        )
-      )
+        ),
+      ),
     );
   }
-
 
   Widget buildDotIndicator(int index, ThemeData theme) {
     return AnimatedContainer(

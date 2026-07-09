@@ -83,6 +83,7 @@ class DaftarTransaksiTab extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
+            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.02),
             blurRadius: 6,
             offset: const Offset(0, 3),
@@ -133,6 +134,7 @@ class DaftarTransaksiTab extends StatelessWidget {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
+                              // ignore: deprecated_member_use
                               color: color.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -216,6 +218,7 @@ class DaftarTransaksiTab extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
+        // ignore: deprecated_member_use
         color: AppColors.base.withOpacity(0.12),
         borderRadius: BorderRadius.circular(5),
       ),
