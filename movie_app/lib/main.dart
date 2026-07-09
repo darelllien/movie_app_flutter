@@ -6,8 +6,13 @@ import 'data/account_data.dart';
 import 'routes/app_routes.dart';
 import 'routes/route_generator.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   await dotenv.load(fileName: ".env");
 
@@ -23,6 +28,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Cinema App',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         scaffoldBackgroundColor: AppColors.background,
 
