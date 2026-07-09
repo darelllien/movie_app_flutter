@@ -27,6 +27,18 @@ class AppTextStyles {
     height: 1.3,
   );
 
+  static TextStyle get movieListTitle => GoogleFonts.poppins(
+    fontSize: 16,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
+  );
+
+  static TextStyle get cinemaTitle => GoogleFonts.inter(
+    fontSize: 18,
+    fontWeight: FontWeight.w700,
+    height: 1.3,
+  );
+
   // Body
   static TextStyle get bodyLarge => GoogleFonts.inter(
     fontSize: 16,
