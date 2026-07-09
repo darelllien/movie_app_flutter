@@ -9,6 +9,7 @@ import '../../repositories/movie_repository.dart';
 import '../../data/dummy_data.dart';
 import '../../utils/formatters.dart';
 import '../details/movie_detail_page.dart';
+import '../details/cinema_detail_page.dart';
 
 class SearchPage extends StatefulWidget {
   const SearchPage({super.key});
@@ -42,16 +43,13 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     _loadSearchHistory();
 
     _tabController.addListener(() {
-      // Kita tambahkan pengecekan ini agar fungsi tidak dipanggil 2x saat animasi geser
       if (_tabController.indexIsChanging) return;
 
       setState(() {
         _searchHint = _tabController.index == 0 ? 'Cari film...' : 'Cari bioskop...';
-
-        // --- LOGIKA RESET SAAT PINDAH TAB ---
         _searchController.clear();
         _currentQuery = '';
-        FocusScope.of(context).unfocus(); // Menutup keyboard seketika
+        FocusScope.of(context).unfocus();
 
         if (_tabController.index == 0) {
           _movieSearchResults = null;
@@ -88,7 +86,6 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
       if (_tabController.index == 0) {
         _movieHistory.remove(cleanQuery);
         _movieHistory.insert(0, cleanQuery);
-        // History dibatasi 3
         if (_movieHistory.length > 3) _movieHistory.removeLast();
         prefs.setStringList('movie_history', _movieHistory);
       } else {
@@ -201,7 +198,6 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     );
   }
 
-  // --- HALAMAN KETIKA SEDANG IDLE (BELUM MENCARI) ---
   Widget _buildIdleState(bool isMovie) {
     final history = isMovie ? _movieHistory : _cinemaHistory;
 
@@ -213,7 +209,6 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. SECTION PENCARIAN SEBELUMNYA
           if (history.isNotEmpty) ...[
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
@@ -233,7 +228,6 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
             const SizedBox(height: 24),
           ],
 
-          // 2. SECTION TREND PENCARIAN
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
@@ -371,7 +365,7 @@ class _SearchPageState extends State<SearchPage> with SingleTickerProviderStateM
     return GestureDetector(
       onTap: () {
         _saveSearchHistory(_currentQuery);
-        // Navigator.push(context, MaterialPageRoute(builder: (context) => CinemaDetailPage(cinema: cinema)));
+        Navigator.push(context, MaterialPageRoute(builder: (context) => CinemaDetailPage(cinema: cinema)));
       },
       child: Container(
         padding: const EdgeInsets.all(16),
