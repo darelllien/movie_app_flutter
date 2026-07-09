@@ -133,7 +133,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 children: [
                   CircleAvatar(
                     radius: 60,
-                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                    // ignore: deprecated_member_use
+                    backgroundColor: AppColors.primary.withOpacity(0.1),
                     backgroundImage: _selectedImagePath != null
                         ? FileImage(File(_selectedImagePath!))
                         : null,

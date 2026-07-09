@@ -115,7 +115,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.green.withValues(alpha: 0.2),
+                            // ignore: deprecated_member_use
+                            color: Colors.green.withOpacity(0.2),
                             blurRadius: 12,
                             offset: const Offset(0, 6),
                           ),
@@ -283,7 +284,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            // ignore: deprecated_member_use
+            color: Colors.black.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -418,10 +420,11 @@ class _CheckoutPageState extends State<CheckoutPage> {
             boxShadow: [
               if (isSelected)
                 BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.3),
+                  // ignore: deprecated_member_use
+                  color: AppColors.primary.withOpacity(0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
-                )
+                ),
             ],
           ),
           child: Theme(
@@ -435,11 +438,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   if (!isFolder) _selectedSubBankId = null;
                 });
               },
-              leading: Icon(
-                method.icon,
-                color: Colors.white,
-                size: 22,
-              ),
+              leading: Icon(method.icon, color: Colors.white, size: 22),
               title: Text(
                 method.name,
                 style: AppTextStyles.bodyMedium.copyWith(
@@ -466,7 +465,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           ),
                           child: Column(
                             children: method.subBanks!.map((bank) {
-                              final isBankSelected = _selectedSubBankId == bank.id;
+                              final isBankSelected =
+                                  _selectedSubBankId == bank.id;
 
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 8),
@@ -483,11 +483,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                   ),
                                 ),
                                 child: Theme(
-                                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                                  data: Theme.of(
+                                    context,
+                                  ).copyWith(dividerColor: Colors.transparent),
                                   child: ExpansionTile(
                                     onExpansionChanged: (expanded) {
                                       if (expanded) {
-                                        setState(() => _selectedSubBankId = bank.id);
+                                        setState(
+                                          () => _selectedSubBankId = bank.id,
+                                        );
                                       }
                                     },
                                     title: Text(
@@ -503,18 +507,29 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                     children: [
                                       Container(
                                         width: double.infinity,
-                                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                                        padding: const EdgeInsets.fromLTRB(
+                                          16,
+                                          0,
+                                          16,
+                                          14,
+                                        ),
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: bank.instructions.map((step) {
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: bank.instructions.map((
+                                            step,
+                                          ) {
                                             return Padding(
-                                              padding: const EdgeInsets.only(bottom: 4),
+                                              padding: const EdgeInsets.only(
+                                                bottom: 4,
+                                              ),
                                               child: Text(
                                                 step,
-                                                style: AppTextStyles.caption.copyWith(
-                                                  color: Colors.black87,
-                                                  height: 1.4,
-                                                ),
+                                                style: AppTextStyles.caption
+                                                    .copyWith(
+                                                      color: Colors.black87,
+                                                      height: 1.4,
+                                                    ),
                                               ),
                                             );
                                           }).toList(),
