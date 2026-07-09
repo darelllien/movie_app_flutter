@@ -66,12 +66,31 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(
-                    Icons.local_movies_rounded,
-                    size: 80,
-                    color: AppColors.primary,
+                  // --- MENGGUNAKAN LOGO APP_ICON.JPG ---
+                  Center(
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/images/logos/app_icon_tr.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 24),
+
                   const Text(
                     'Selamat Datang',
                     style: TextStyle(
@@ -135,7 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         return 'Email tidak boleh kosong';
                       }
                       final emailRegex = RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$',
                       );
                       if (!emailRegex.hasMatch(value.trim())) {
                         return 'Masukkan format email yang valid';
@@ -298,7 +317,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       try {
                         final isSuccess =
-                            await AccountData.loginWithGoogleFirebase();
+                        await AccountData.loginWithGoogleFirebase();
 
                         if (kDebugMode) {
                           print("Login Success : $isSuccess");
