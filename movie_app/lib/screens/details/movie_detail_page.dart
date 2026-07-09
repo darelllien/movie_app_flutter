@@ -3,25 +3,106 @@ import 'package:movie_app/constants/app_color.dart';
 import 'package:movie_app/constants/app_text_styles.dart';
 import 'package:movie_app/models/movie.dart';
 import 'package:movie_app/widgets/ticket_buttom_sheet.dart';
-import 'package:movie_app/widgets/cinema_card.dart';
 import 'package:movie_app/data/dummy_data.dart';
+import 'package:movie_app/services/api_services.dart';
+import 'package:movie_app/widgets/cinema_schedule_card.dart';
 
-class MovieDetailPage extends StatelessWidget {
+class MovieDetailPage extends StatefulWidget {
   final Movie movie;
 
   const MovieDetailPage({super.key, required this.movie});
 
   @override
+  State<MovieDetailPage> createState() => _MovieDetailPageState();
+}
+
+class _MovieDetailPageState extends State<MovieDetailPage> {
+  bool _isSynopsisTab = true;
+  final DateTime _baseDate = DateTime(2026, 7, 10);
+  late DateTime _selectedDate = _baseDate;
+  String? _selectedCinemaName;
+  String? _selectedShowtime;
+  String _selectedCity = 'BEKASI';
+
+  List<Map<String, String>> _cast = [];
+  String _director = 'Memuat...';
+  String _producer = 'Memuat...';
+  bool _isLoadingCredits = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCredits();
+  }
+
+  Future<void> _fetchCredits() async {
+    try {
+      final api = ApiService();
+      final credits = await api.getMovieCredits(widget.movie.id);
+      
+      final castData = credits['cast'] as List;
+      final parsedCast = castData.take(10).map((c) {
+        return {
+          'image': c['profile_path'] != null ? 'https://image.tmdb.org/t/p/w200${c['profile_path']}' : '',
+          'name': c['name'].toString(),
+          'role': c['character'].toString(),
+        };
+      }).toList();
+
+      final crewData = credits['crew'] as List;
+      final directorNode = crewData.firstWhere((c) => c['job'] == 'Director', orElse: () => {'name': '-'});
+      final producers = crewData.where((c) => c['job'] == 'Producer').map((c) => c['name']).toList();
+
+      if (mounted) {
+        setState(() {
+          _cast = parsedCast;
+          _director = directorNode['name'];
+          _producer = producers.isNotEmpty ? producers.join(', ') : '-';
+          _isLoadingCredits = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoadingCredits = false;
+          _director = '-';
+          _producer = '-';
+        });
+      }
+    }
+  }
+
+  String _getMonthName(int month) {
+    const months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+    ];
+    return months[month - 1];
+  }
+
+  String _getDayName(int weekday) {
+    const days = ['SEN', 'SEL', 'RAB', 'KAM', 'JUM', 'SAB', 'MIN'];
+    return days[weekday - 1];
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // Membatasi maksimal 2 genre
+    final genres = widget.movie.genreNames.split(', ').take(2).toList();
+    
+    // Mengecek apakah tombol beli tiket aktif
+    final isTicketActive = !_isSynopsisTab && _selectedShowtime != null;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SingleChildScrollView(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // HEADER (Backdrop + Poster + Title)
             Stack(
               clipBehavior: Clip.none,
               children: [
-                // 1. BACKDROP & GRADIENT
                 SizedBox(
                   height: 250,
                   width: double.infinity,
@@ -29,11 +110,10 @@ class MovieDetailPage extends StatelessWidget {
                     fit: StackFit.expand,
                     children: [
                       Image.network(
-                        movie.fullBackdropUrl,
+                        widget.movie.fullBackdropUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(color: AppColors.primary);
-                        },
+                        errorBuilder: (context, error, stackTrace) =>
+                            Container(color: AppColors.primary),
                       ),
                       Container(
                         decoration: const BoxDecoration(
@@ -48,7 +128,6 @@ class MovieDetailPage extends StatelessWidget {
                           ),
                         ),
                       ),
-                      // PLAY BUTTON OVERLAY
                       Center(
                         child: Container(
                           decoration: BoxDecoration(
@@ -66,24 +145,16 @@ class MovieDetailPage extends StatelessWidget {
                     ],
                   ),
                 ),
-
-                // 2. BACK BUTTON (Kiri Atas)
                 Positioned(
                   top: MediaQuery.of(context).padding.top + 8,
                   left: 8,
                   child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                      size: 28,
-                    ),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
-
-                // 3. OVERLAPPING POSTER
                 Positioned(
-                  top: 190, // 250 (backdrop) - 60 (overlap)
+                  top: 190,
                   left: 16,
                   child: Container(
                     decoration: BoxDecoration(
@@ -99,44 +170,33 @@ class MovieDetailPage extends StatelessWidget {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.network(
-                        movie.fullPosterUrl,
+                        widget.movie.fullPosterUrl,
                         width: 110,
                         height: 160,
                         fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            width: 110,
-                            height: 160,
-                            color: AppColors.primary,
-                            child: const Icon(
-                              Icons.broken_image,
-                              color: AppColors.white,
-                            ),
-                          );
-                        },
+                        errorBuilder: (context, error, stackTrace) => Container(
+                          width: 110,
+                          height: 160,
+                          color: AppColors.primary,
+                          child: const Icon(Icons.broken_image, color: AppColors.white),
+                        ),
                       ),
                     ),
                   ),
                 ),
-
-                // 4. TITLE & GENRES (Sebelah kanan poster, di bawah backdrop)
                 Positioned(
-                  top: 260, // 250 (backdrop) + 10 margin
-                  left: 142, // 16 (padding) + 110 (lebar poster) + 16 (jarak)
+                  top: 260,
+                  left: 142,
                   right: 16,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          const Icon(
-                            Icons.star,
-                            color: AppColors.cta,
-                            size: 18,
-                          ),
+                          const Icon(Icons.star, color: AppColors.cta, size: 18),
                           const SizedBox(width: 4),
                           Text(
-                            '${movie.voteAverage.toStringAsFixed(1)} [TMDB]',
+                            widget.movie.voteAverage.toStringAsFixed(1),
                             style: AppTextStyles.bodyMedium.copyWith(
                               color: AppColors.textPrimary,
                               fontWeight: FontWeight.bold,
@@ -146,7 +206,7 @@ class MovieDetailPage extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        movie.title,
+                        widget.movie.title,
                         style: AppTextStyles.headingLarge.copyWith(
                           color: AppColors.textPrimary,
                           fontSize: 20,
@@ -158,16 +218,14 @@ class MovieDetailPage extends StatelessWidget {
                       Wrap(
                         spacing: 8,
                         runSpacing: 8,
-                        children: movie.genreNames.split(', ').map((genre) {
+                        children: genres.map((genre) {
                           return Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 10,
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              border: Border.all(
-                                color: AppColors.textSecondary,
-                              ),
+                              border: Border.all(color: AppColors.textSecondary),
                               borderRadius: BorderRadius.circular(16),
                             ),
                             child: Text(
@@ -184,53 +242,113 @@ class MovieDetailPage extends StatelessWidget {
                 ),
               ],
             ),
+            
+            // Jarak untuk ruang poster yang menjulur (130) + 16 padding
+            const SizedBox(height: 146),
 
-            // 5. MAIN CONTENT (Overview & Cast)
-            Padding(
-              padding: const EdgeInsets.only(
-                top: 130,
-                left: 16,
-                right: 16,
-              ), // Memberi ruang untuk poster yang menjulur ke bawah
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildMovieOverview(),
-                  const SizedBox(height: 24),
-                  _buildTopCast(),
-                  const SizedBox(height: 24),
-                  _buildCinemaList(),
-                  const SizedBox(height: 32),
-                ],
+            // TABS
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  bottom: BorderSide(color: Colors.grey[300]!, width: 1),
+                ),
               ),
+              child: Row(
+                children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _isSynopsisTab = true),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: _isSynopsisTab ? AppColors.primary : Colors.grey[300]!,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'SINOPSIS',
+                          style: AppTextStyles.headingSmall.copyWith(
+                            color: _isSynopsisTab ? AppColors.primary : Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => setState(() => _isSynopsisTab = false),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(
+                            color: !_isSynopsisTab ? AppColors.primary : Colors.grey[300]!,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'JADWAL',
+                          style: AppTextStyles.headingSmall.copyWith(
+                            color: !_isSynopsisTab ? AppColors.primary : Colors.grey,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
+            ),
+
+            // CONTENT
+            // CONTENT
+            _isSynopsisTab ? _buildSynopsisContent() : _buildJadwalContent(),
           ],
         ),
       ),
       bottomNavigationBar: SafeArea(
-        // Dibungkus SafeArea agar tombol tidak tertutup oleh system navigation bar OS.
-        bottom: true,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, -5),
+              ),
+            ],
+          ),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.cta,
-              foregroundColor: AppColors.textOnCta,
+              backgroundColor: isTicketActive ? AppColors.cta : Colors.grey[400],
+              foregroundColor: isTicketActive ? AppColors.textOnCta : Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(8),
               ),
-              elevation: 4,
+              elevation: 0,
             ),
-            onPressed: () {
-              TicketBottomSheet.show(
-                context,
-                movieTitle: movie.title,
-                cinemaName: 'Pilih Bioskop',
-              );
-            },
+            onPressed: isTicketActive
+                ? () {
+                    TicketBottomSheet.show(
+                      context,
+                      movieTitle: widget.movie.title,
+                      cinemaName: _selectedCinemaName ?? 'Bioskop',
+                    );
+                  }
+                : null,
             child: Text(
-              'Book Tickets',
+              'BELI TIKET',
               style: AppTextStyles.button.copyWith(fontSize: 16),
             ),
           ),
@@ -239,92 +357,273 @@ class MovieDetailPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMovieOverview() {
-    return Text(
-      movie.overview,
-      style: AppTextStyles.bodyMedium.copyWith(
-        color: AppColors.textSecondary,
-        height: 1.5,
-      ),
-      textAlign: TextAlign.justify,
+  Widget _buildSynopsisContent() {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.only(bottom: 24.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 16),
+        // OVERVIEW
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            (widget.movie.overview.isEmpty || widget.movie.overview.toLowerCase().contains('belum tersedia'))
+                ? 'Film fiksi fana yang mengisahkan sebuah petualangan seru penuh dengan drama, aksi, dan intrik yang memukau. Para karakter akan dibawa ke dalam petualangan emosional dalam menghadapi berbagai konflik batin serta tantangan hidup yang tak terduga untuk mencapai tujuan akhir mereka. Karya sinematik ini menyajikan visual yang indah dan alur cerita yang sangat tidak bisa ditebak.' 
+                : widget.movie.overview,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.textPrimary,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.justify,
+          ),
+        ),
+        const SizedBox(height: 24),
+        
+        // CREW (Producer & Director)
+        const Divider(height: 1),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Produser', style: AppTextStyles.headingSmall),
+              const SizedBox(height: 4),
+              Text(
+                _producer,
+                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 16),
+              Text('Sutradara', style: AppTextStyles.headingSmall),
+              const SizedBox(height: 4),
+              Text(
+                _director,
+                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Divider(height: 1),
+        const SizedBox(height: 24),
+
+        // TOP CAST
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Text(
+            'Pemeran',
+            style: AppTextStyles.headingMedium.copyWith(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: SizedBox(
+          height: 180,
+          child: _isLoadingCredits
+              ? const Center(child: CircularProgressIndicator())
+              : _cast.isEmpty
+                  ? const Center(child: Text('Data pemeran belum tersedia.'))
+                  : ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _cast.length,
+                      itemBuilder: (context, index) {
+                        final cast = _cast[index];
+              return Container(
+                width: 90,
+                margin: const EdgeInsets.only(right: 16),
+                child: Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.network(
+                        cast['image']!,
+                        width: 90,
+                        height: 110,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, err, stack) => Container(
+                          width: 90,
+                          height: 110,
+                          color: Colors.grey[300],
+                          child: const Icon(Icons.person, color: Colors.grey),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      cast['name']!,
+                      style: AppTextStyles.bodySmall.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      cast['role']!,
+                      style: AppTextStyles.caption.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+        ),
+        const SizedBox(height: 24),
+      ],
+    ),
     );
   }
 
-  Widget _buildTopCast() {
-    // Dummy data untuk mensimulasikan foto cast yang elegan
-    final List<Map<String, String>> dummyCast = [
-      {'image': 'https://randomuser.me/api/portraits/men/32.jpg'},
-      {'image': 'https://randomuser.me/api/portraits/women/44.jpg'},
-      {'image': 'https://randomuser.me/api/portraits/men/46.jpg'},
-      {'image': 'https://randomuser.me/api/portraits/men/22.jpg'},
-      {'image': 'https://randomuser.me/api/portraits/women/12.jpg'},
-    ];
-
+  Widget _buildJadwalContent() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Top Cast :',
-          style: AppTextStyles.headingMedium.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        const SizedBox(height: 12),
-        SizedBox(
-          height: 100, // Tinggi untuk menampung gambar kapsul vertikal
+        // DATE PICKER
+        Container(
+          color: Colors.white,
+          padding: const EdgeInsets.only(top: 16.0, bottom: 16.0),
+          child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: SizedBox(
+          height: 70,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
-            itemCount: dummyCast.length,
+            itemCount: 7,
             itemBuilder: (context, index) {
-              return Container(
-                margin: const EdgeInsets.only(right: 12),
-                width: 70,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(35),
-                  color: AppColors.textSecondary.withValues(alpha: 0.2),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(35),
-                  child: Image.network(
-                    dummyCast[index]['image']!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(
-                        Icons.person,
-                        color: AppColors.textSecondary,
-                        size: 32,
-                      );
-                    },
+              final date = _baseDate.add(Duration(days: index));
+              final isSelected = date.day == _selectedDate.day && date.month == _selectedDate.month;
+              
+              String dayLabel = (index == 0) ? 'HARI INI' : _getDayName(date.weekday);
+
+              return GestureDetector(
+                onTap: () {
+                  setState(() {
+                    _selectedDate = date;
+                    // Reset selected showtime when date changes
+                    _selectedShowtime = null;
+                  });
+                },
+                child: Container(
+                  width: 80,
+                  margin: const EdgeInsets.only(right: 12),
+                  decoration: BoxDecoration(
+                    color: isSelected ? AppColors.primary : Colors.white,
+                    border: Border.all(
+                      color: isSelected ? AppColors.primary : Colors.grey[300]!,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '${date.day.toString().padLeft(2, '0')} ${_getMonthName(date.month)}',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: isSelected ? Colors.white : AppColors.textPrimary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        dayLabel,
+                        style: AppTextStyles.caption.copyWith(
+                          color: isSelected ? Colors.white : AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
             },
           ),
         ),
-      ],
-    );
-  }
+        ),
+        ),
+        const SizedBox(height: 24),
 
-  Widget _buildCinemaList() {
-    // Assignment mewajibkan list maksimal 5 bioskop di detail film.
-    final cinemas = DummyData.cinemas.take(5).toList();
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Bioskop Tersedia',
-          style: AppTextStyles.headingMedium.copyWith(
-            color: AppColors.textPrimary,
-            fontWeight: FontWeight.bold,
+        // CITY DROPDOWN
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          decoration: BoxDecoration(
+            color: Colors.grey[100],
+            border: Border.symmetric(
+              horizontal: BorderSide(color: Colors.grey[300]!, width: 1),
+            ),
+          ),
+          child: Row(
+            children: [
+              Icon(Icons.location_on, color: Colors.grey[500]),
+              const SizedBox(width: 12),
+              Expanded(
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    isDense: true,
+                    isExpanded: true,
+                    value: _selectedCity,
+                    icon: Icon(Icons.keyboard_arrow_down, color: Colors.grey[500]),
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textPrimary,
+                      fontSize: 16,
+                    ),
+                    items: ['JAKARTA', 'BOGOR', 'DEPOK', 'TANGERANG', 'BEKASI', 'CIREBON'].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: (newValue) {
+                      if (newValue != null) {
+                        setState(() {
+                          _selectedCity = newValue;
+                        });
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 12),
-        ...cinemas.map((cinema) {
-          return CinemaCard(
+        const SizedBox(height: 24),
+
+        // CINEMA SCHEDULES (Max 5)
+        ...DummyData.cinemaSchedules.take(5).toList().asMap().entries.map((entry) {
+          final int index = entry.key;
+          final cinema = entry.value;
+          return CinemaScheduleCard(
             cinema: cinema,
-            onBuyPressed: () {},
+            selectedCinemaName: _selectedCinemaName,
+            selectedShowtime: _selectedShowtime,
+            isFirst: index == 0,
+            onShowtimeSelected: (cinemaName, showtime) {
+              setState(() {
+                if (_selectedCinemaName == cinemaName && _selectedShowtime == showtime) {
+                  _selectedCinemaName = null;
+                  _selectedShowtime = null;
+                } else {
+                  _selectedCinemaName = cinemaName;
+                  _selectedShowtime = showtime;
+                }
+              });
+            },
+            onViewMore: () {
+              // Handle view more schedules action
+            },
           );
         }),
       ],

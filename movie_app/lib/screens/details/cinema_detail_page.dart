@@ -82,20 +82,35 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(12),
-          child: Image.network(
-            widget.cinema.logoUrl,
-            width: 100,
-            height: 100,
-            fit: BoxFit.cover,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(
-                width: 100,
-                height: 100,
-                color: AppColors.base,
-                child: const Icon(Icons.movie, color: AppColors.primary),
-              );
-            },
-          ),
+          child: widget.cinema.logoUrl.startsWith('http')
+              ? Image.network(
+                  widget.cinema.logoUrl,
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 100,
+                      height: 100,
+                      color: AppColors.base,
+                      child: const Icon(Icons.movie, color: AppColors.primary),
+                    );
+                  },
+                )
+              : Image.asset(
+                  widget.cinema.logoUrl,
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      width: 100,
+                      height: 100,
+                      color: AppColors.base,
+                      child: const Icon(Icons.movie, color: AppColors.primary),
+                    );
+                  },
+                ),
         ),
         const SizedBox(width: 16),
         Expanded(
