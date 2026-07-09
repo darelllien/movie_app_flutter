@@ -7,7 +7,7 @@ import 'package:movie_app/screens/main/widgets/daftar_transaksi_tab.dart';
 import 'package:movie_app/screens/main/widgets/edit_profile_page.dart';
 
 import '../../data/account_data.dart';
-import '../auth/login_page.dart';
+import '../../routes/app_routes.dart';
 
 class ProfileTab extends StatefulWidget {
   const ProfileTab({super.key});
@@ -27,14 +27,12 @@ class _ProfileTabState extends State<ProfileTab> {
     _loadUserData();
   }
 
-  // UPGRADE: Membaca data secara dinamis dari memori fisik HP
   Future<void> _loadUserData() async {
     final userData = await AccountData.getCurrentUser();
     if (userData != null && mounted) {
       setState(() {
         userName = userData['name'] ?? 'User';
         userEmail = userData['email'] ?? '-';
-        // Ambil image path lokal jika string tidak kosong
         _profileImagePath =
             (userData['image'] != null && userData['image']!.isNotEmpty)
             ? userData['image']
@@ -46,10 +44,10 @@ class _ProfileTabState extends State<ProfileTab> {
   void _logout() async {
     await AccountData.logout();
     if (!mounted) return;
-    Navigator.pushAndRemoveUntil(
+    Navigator.pushNamedAndRemoveUntil(
       context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-      (route) => false,
+      AppRoutes.login,
+          (route) => false,
     );
   }
 
@@ -92,10 +90,8 @@ class _ProfileTabState extends State<ProfileTab> {
                       currentEmail: userEmail,
                       currentImagePath: _profileImagePath,
                       onSave: (newName, newImagePath) async {
-                        // 1. SIMPAN KE STORAGE LOKAL HP AGAR PERMANEN
                         await AccountData.updateUser(newName, newImagePath);
 
-                        // 2. REFRESH TAMPILAN LAYAR UTAMA
                         setState(() {
                           userName = newName;
                           _profileImagePath = newImagePath;
@@ -107,7 +103,6 @@ class _ProfileTabState extends State<ProfileTab> {
               },
             ),
 
-            // TabBar Navigation
             Container(
               color: Colors.white,
               child: const TabBar(

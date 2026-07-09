@@ -42,4 +42,20 @@ class MovieRepository {
       }
     }).toList();
   }
+
+  Future<List<Movie>> searchMovies(String query) async {
+    if (query.trim().isEmpty) return [];
+
+    final movies = await _apiService.searchMovies(query);
+
+    return movies.where((movie) {
+      try {
+        if (_containsNonAscii.hasMatch(movie.title)) return false;
+
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }).toList();
+  }
 }
