@@ -83,6 +83,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+
+                  Center(
+                    child: Container(
+                      width: 100,
+                      height: 100,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: Image.asset(
+                          'assets/images/logos/app_icon_tr.png',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+
                   const Text(
                     'Daftar Akun',
                     style: TextStyle(
@@ -192,7 +217,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         return 'Email tidak boleh kosong';
                       }
                       final emailRegex = RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$',
                       );
                       if (!emailRegex.hasMatch(value.trim())) {
                         return 'Masukkan format email yang valid';
@@ -221,7 +246,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           color: Colors.grey,
                         ),
                         onPressed: () => setState(
-                          () => _isPasswordObscured = !_isPasswordObscured,
+                              () => _isPasswordObscured = !_isPasswordObscured,
                         ),
                       ),
                       contentPadding: const EdgeInsets.symmetric(vertical: 18),
@@ -287,7 +312,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Teks Pindah ke Login
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
