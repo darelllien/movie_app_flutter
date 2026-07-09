@@ -8,15 +8,16 @@ import '../../utils/formatters.dart';
 import '../details/movie_detail_page.dart';
 import 'search_page.dart';
 import 'movie_list_tab.dart';
+import '../../data/account_data.dart';
 
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
 
   @override
-  State<HomeTab> createState() => _HomeTabState();
+  State<HomeTab> createState() => HomeTabState();
 }
 
-class _HomeTabState extends State<HomeTab> {
+class HomeTabState extends State<HomeTab> {
   static const double _pagePadding = 20;
   static const double _upcomingListHeight = 240;
   static const double _posterAspectRatio = 2 / 3;
@@ -29,14 +30,34 @@ class _HomeTabState extends State<HomeTab> {
 
   final MovieRepository _movieRepository = MovieRepository();
 
+  String _currentUserName = 'User';
+
   late final Future<List<Movie>> _nowPlayingFuture;
   late final Future<List<Movie>> _upcomingFuture;
+
+  void loadUserNameExternal() {
+    _loadUserName();
+  }
 
   @override
   void initState() {
     super.initState();
     _nowPlayingFuture = _movieRepository.getNowPlayingMovies();
     _upcomingFuture = _movieRepository.getUpcomingMovies();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final userData = await AccountData.getCurrentUser();
+
+    if (userData != null && mounted) {
+      setState(() {
+        _currentUserName =
+            (userData['name'] != null && userData['name']!.isNotEmpty)
+            ? userData['name']!
+            : 'User';
+      });
+    }
   }
 
   double _nowPlayingCardHeight(BuildContext context) {
@@ -78,7 +99,10 @@ class _HomeTabState extends State<HomeTab> {
                   _buildMovieStateWrapper(
                     future: _nowPlayingFuture,
                     height: _nowPlayingCardHeight(context),
-                    onSuccess: (movies) => _buildNowPlayingCarousel(movies, _nowPlayingCardHeight(context)),
+                    onSuccess: (movies) => _buildNowPlayingCarousel(
+                      movies,
+                      _nowPlayingCardHeight(context),
+                    ),
                   ),
 
                   const SizedBox(height: 24),
@@ -89,9 +113,8 @@ class _HomeTabState extends State<HomeTab> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const MovieListTab(
-                            type: MovieListType.upcoming,
-                          ),
+                          builder: (context) =>
+                              const MovieListTab(type: MovieListType.upcoming),
                         ),
                       );
                     },
@@ -138,7 +161,9 @@ class _HomeTabState extends State<HomeTab> {
                 child: Text(
                   'Gagal memuat film.\n${snapshot.error}',
                   textAlign: TextAlign.center,
-                  style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
             ),
@@ -153,7 +178,9 @@ class _HomeTabState extends State<HomeTab> {
             child: Center(
               child: Text(
                 'Belum ada film untuk ditampilkan.',
-                style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
             ),
           );
@@ -177,10 +204,7 @@ class _HomeTabState extends State<HomeTab> {
         padEnds: true,
       ),
       itemBuilder: (context, index, realIndex) {
-        return _NowPlayingCard(
-          movie: movies[index],
-          height: height,
-        );
+        return _NowPlayingCard(movie: movies[index], height: height);
       },
     );
   }
@@ -231,8 +255,10 @@ class _HomeTabState extends State<HomeTab> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Halo, Irfan!',
-                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.base),
+                    'Halo, $_currentUserName!',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.base,
+                    ),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -254,7 +280,9 @@ class _HomeTabState extends State<HomeTab> {
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Fitur ini masih belum tersedia saat ini'),
+                        content: Text(
+                          'Fitur ini masih belum tersedia saat ini',
+                        ),
                       ),
                     );
                   },
@@ -271,8 +299,13 @@ class _HomeTabState extends State<HomeTab> {
             ),
             decoration: InputDecoration(
               hintText: 'Cari judul film atau bioskop...',
-              hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
-              prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+              hintStyle: AppTextStyles.bodyMedium.copyWith(
+                color: AppColors.textSecondary,
+              ),
+              prefixIcon: const Icon(
+                Icons.search,
+                color: AppColors.textSecondary,
+              ),
               filled: true,
               fillColor: AppColors.surface,
               contentPadding: const EdgeInsets.symmetric(vertical: 14),
@@ -298,7 +331,9 @@ class _HomeTabState extends State<HomeTab> {
         children: [
           Text(
             title,
-            style: AppTextStyles.headingMedium.copyWith(color: AppColors.textPrimary),
+            style: AppTextStyles.headingMedium.copyWith(
+              color: AppColors.textPrimary,
+            ),
           ),
           GestureDetector(
             onTap: onSeeAll,
@@ -320,10 +355,7 @@ class _NowPlayingCard extends StatelessWidget {
   final Movie movie;
   final double height;
 
-  const _NowPlayingCard({
-    required this.movie,
-    required this.height,
-  });
+  const _NowPlayingCard({required this.movie, required this.height});
 
   @override
   Widget build(BuildContext context) {
@@ -331,7 +363,9 @@ class _NowPlayingCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MovieDetailPage(movie: movie)),
+          MaterialPageRoute(
+            builder: (context) => MovieDetailPage(movie: movie),
+          ),
         );
       },
       child: ClipRRect(
@@ -350,14 +384,20 @@ class _NowPlayingCard extends StatelessWidget {
                   return Container(
                     color: AppColors.surface,
                     child: const Center(
-                      child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
+                      child: CircularProgressIndicator(
+                        color: AppColors.primary,
+                        strokeWidth: 2,
+                      ),
                     ),
                   );
                 },
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
                     color: AppColors.surface,
-                    child: const Icon(Icons.broken_image, color: AppColors.textSecondary),
+                    child: const Icon(
+                      Icons.broken_image,
+                      color: AppColors.textSecondary,
+                    ),
                   );
                 },
               ),
@@ -382,7 +422,10 @@ class _NowPlayingCard extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: AppColors.black.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(20),
@@ -390,7 +433,11 @@ class _NowPlayingCard extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.star, size: 14, color: AppColors.cta),
+                          const Icon(
+                            Icons.star,
+                            size: 14,
+                            color: AppColors.cta,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             movie.voteAverage.toStringAsFixed(1),
@@ -443,7 +490,9 @@ class _MovieCarouselCard extends StatelessWidget {
       onTap: () {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MovieDetailPage(movie: movie)),
+          MaterialPageRoute(
+            builder: (context) => MovieDetailPage(movie: movie),
+          ),
         );
       },
       child: Column(
@@ -463,7 +512,10 @@ class _MovieCarouselCard extends StatelessWidget {
                   width: imageWidth,
                   height: imageHeight,
                   child: const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary, strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      color: AppColors.primary,
+                      strokeWidth: 2,
+                    ),
                   ),
                 );
               },
@@ -472,7 +524,10 @@ class _MovieCarouselCard extends StatelessWidget {
                   width: imageWidth,
                   height: imageHeight,
                   color: AppColors.surface,
-                  child: const Icon(Icons.broken_image, color: AppColors.textSecondary),
+                  child: const Icon(
+                    Icons.broken_image,
+                    color: AppColors.textSecondary,
+                  ),
                 );
               },
             ),
@@ -491,7 +546,9 @@ class _MovieCarouselCard extends StatelessWidget {
             const SizedBox(height: 2),
             Text(
               'Rilis: ${Formatters.formatDate(movie.releaseDate)}',
-              style: AppTextStyles.bodySmall.copyWith(color: AppColors.textSecondary),
+              style: AppTextStyles.bodySmall.copyWith(
+                color: AppColors.textSecondary,
+              ),
             ),
           ],
         ],

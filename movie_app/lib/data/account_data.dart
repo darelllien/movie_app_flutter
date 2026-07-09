@@ -1,97 +1,92 @@
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AccountData {
-  static const String _usersKey = 'users_list';
-  static const String _currentUserKey = 'current_user';
+  // ==========================================
+  // FUNGSI AUTENTIKASI BAWAAN KELOMPOK (DIKEMBALIKAN)
+  // ==========================================
 
-  // --- TAMBAHKAN FUNGSI INI ---
-  /// Menginisialisasi akun admin jika belum ada di database lokal
+  // Membantu menginisialisasi akun admin default di main.dart saat aplikasi pertama start
   static Future<void> initializeAdmin() async {
     final prefs = await SharedPreferences.getInstance();
-    List<String> usersStr = prefs.getStringList(_usersKey) ?? [];
-
-    // Cek apakah akun admin sudah terdaftar
-    bool adminExists = false;
-    for (String userStr in usersStr) {
-      Map<String, dynamic> user = jsonDecode(userStr);
-      if (user['email'] == 'admin123@gmail.com') {
-        adminExists = true;
-        break;
-      }
+    // Jika data lokal masih kosong, pasang kredensial admin bawaan awal
+    if (!prefs.containsKey('user_name')) {
+      await prefs.setString('user_name', 'admin');
+      await prefs.setString('user_email', 'admin123@gmail.com');
+      await prefs.setString(
+        'user_password',
+        'admin123',
+      ); // Jika ada sistem validasi pass lokal
+      await prefs.setString('user_image', '');
     }
+  }
 
-    // Jika admin belum ada, masukkan ke dalam daftar akun
-    if (!adminExists) {
-      Map<String, dynamic> adminUser = {
-        'name': 'admin',
-        'email': 'admin123@gmail.com',
-        'password': '123456',
+  // Fungsi pengecekan login untuk login_page.dart
+  static Future<bool> loginUser(String email, String password) async {
+    final prefs = await SharedPreferences.getInstance();
+    final localEmail = prefs.getString('user_email') ?? 'admin123@gmail.com';
+    final localPassword = prefs.getString('user_password') ?? 'admin123';
+
+    if (email == localEmail && password == localPassword) {
+      await prefs.setBool('is_logged_in', true);
+      return true;
+    }
+    return false;
+  }
+
+  // Fungsi pendaftaran akun baru untuk register_page.dart
+  static Future<bool> registerUser(
+    String name,
+    String email,
+    String password,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    try {
+      await prefs.setString('user_name', name);
+      await prefs.setString('user_email', email);
+      await prefs.setString('user_password', password);
+      await prefs.setString('user_image', '');
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  // ==========================================
+  // FUNGSI TULIS & BACA DATA UNTUK PROFILE
+  // ==========================================
+
+  // Mengambil user aktif secara dinamis dari storage lokal
+  static Future<Map<String, String>?> getCurrentUser() async {
+    final prefs = await SharedPreferences.getInstance();
+
+    final String? localName = prefs.getString('user_name');
+    final String? localEmail = prefs.getString('user_email');
+    final String? localImagePath = prefs.getString('user_image');
+
+    if (localName != null && localEmail != null) {
+      return {
+        'name': localName,
+        'email': localEmail,
+        'image': localImagePath ?? '',
       };
-      usersStr.add(jsonEncode(adminUser));
-      await prefs.setStringList(_usersKey, usersStr);
-      print('Akun admin default berhasil dibuat!'); // Hanya untuk pengecekan di terminal
     }
+
+    return {'name': 'admin', 'email': 'admin123@gmail.com', 'image': ''};
   }
 
-  /// Mendaftarkan pengguna baru.
-  /// Mengembalikan [true] jika berhasil, [false] jika email sudah terdaftar.
-  static Future<bool> registerUser(String name, String email, String password) async {
+  // Menyimpan perubahan modifikasi nama & foto dari halaman edit profile
+  static Future<void> updateUser(String newName, String? newImagePath) async {
     final prefs = await SharedPreferences.getInstance();
-    List<String> usersStr = prefs.getStringList(_usersKey) ?? [];
-
-    // Cek apakah email sudah terdaftar (Verifikasi Akun)
-    for (String userStr in usersStr) {
-      Map<String, dynamic> user = jsonDecode(userStr);
-      if (user['email'] == email) {
-        return false; // Email sudah digunakan
-      }
+    await prefs.setString('user_name', newName);
+    if (newImagePath != null) {
+      await prefs.setString('user_image', newImagePath);
     }
-
-    // Simpan data pengguna baru
-    Map<String, dynamic> newUser = {
-      'name': name,
-      'email': email,
-      'password': password,
-    };
-
-    usersStr.add(jsonEncode(newUser));
-    await prefs.setStringList(_usersKey, usersStr);
-    return true;
   }
 
-  /// Memverifikasi login.
-  /// Mengembalikan data user jika valid, atau [null] jika email/password salah.
-  static Future<Map<String, dynamic>?> loginUser(String email, String password) async {
-    final prefs = await SharedPreferences.getInstance();
-    List<String> usersStr = prefs.getStringList(_usersKey) ?? [];
-
-    for (String userStr in usersStr) {
-      Map<String, dynamic> user = jsonDecode(userStr);
-      if (user['email'] == email && user['password'] == password) {
-        // Simpan sesi login aktif
-        await prefs.setString(_currentUserKey, jsonEncode(user));
-        await prefs.setBool('isLoggedIn', true);
-        return user;
-      }
-    }
-    return null; // Kredensial tidak valid
-  }
-
-  /// Mengambil data pengguna yang sedang login saat ini (berguna untuk halaman Profil)
-  static Future<Map<String, dynamic>?> getCurrentUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? userStr = prefs.getString(_currentUserKey);
-    if (userStr != null) {
-      return jsonDecode(userStr);
-    }
-    return null;
-  }
-
-  /// Logout
+  // Fungsi logout total sekalian membersihkan session state login
   static Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_currentUserKey);
-    await prefs.setBool('isLoggedIn', false);
+    // Hapus status login saja agar data profil buatan user tidak ikut ke-reset saat logout
+    await prefs.setBool('is_logged_in', false);
   }
 }

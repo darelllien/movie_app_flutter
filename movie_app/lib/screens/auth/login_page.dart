@@ -17,21 +17,34 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _login() async {
     if (_formKey.currentState!.validate()) {
-      var userData = await AccountData.loginUser(
+      await AccountData.loginUser(
         _emailController.text.trim(),
         _passwordController.text,
       );
 
       if (!mounted) return;
 
-      if (userData != null) {
-        // Login berhasil, arahkan ke MainPage
+      final isSuccess = await AccountData.loginUser(
+        _emailController.text, // Sesuaikan dengan nama controller email aslimu
+        _passwordController
+            .text, // Sesuaikan dengan nama controller password aslimu
+      );
+
+      // ... (jika ada kode validasi form input di antaranya, biarkan saja) ...
+
+      // 2. DI BARIS 43 (Ganti blok if-else navigasi lamamu dengan ini):
+      if (isSuccess) {
         Navigator.pushReplacement(
+          // ignore: use_build_context_synchronously
           context,
-          MaterialPageRoute(builder: (_) => const MainPage()),
+          MaterialPageRoute(
+            // PENTING: Ganti 'NamaClassUtamaProyekmu' di bawah ini dengan class dashboard yang kamu temukan tadi!
+            // Contoh kemungkinan: MainDashboard, DashboardScreen, NavScreen, HomeScreen, dsb.
+            builder: (context) => const MainPage(),
+          ),
         );
       } else {
-        // Login gagal
+        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Email atau Password salah!')),
         );
@@ -53,7 +66,11 @@ class _LoginScreenState extends State<LoginScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text('Login', style: theme.textTheme.displayLarge, textAlign: TextAlign.center),
+                Text(
+                  'Login',
+                  style: theme.textTheme.displayLarge,
+                  textAlign: TextAlign.center,
+                ),
                 const SizedBox(height: 32),
 
                 // Field Email
@@ -67,9 +84,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     filled: true,
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) return 'Email tidak boleh kosong';
-                    final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                    if (!emailRegex.hasMatch(value)) return 'Masukkan format email yang valid';
+                    if (value == null || value.isEmpty) {
+                      return 'Email tidak boleh kosong';
+                    }
+                    final emailRegex = RegExp(
+                      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                    );
+                    if (!emailRegex.hasMatch(value)) {
+                      return 'Masukkan format email yang valid';
+                    }
                     return null;
                   },
                 ),
@@ -86,25 +109,27 @@ class _LoginScreenState extends State<LoginScreen> {
                     filled: true,
                   ),
                   validator: (value) {
-                    if (value == null || value.isEmpty) return 'Password tidak boleh kosong';
+                    if (value == null || value.isEmpty) {
+                      return 'Password tidak boleh kosong';
+                    }
                     return null;
                   },
                 ),
                 const SizedBox(height: 24),
 
-                ElevatedButton(
-                  onPressed: _login,
-                  child: const Text('Masuk'),
-                ),
+                ElevatedButton(onPressed: _login, child: const Text('Masuk')),
                 TextButton(
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen()));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
+                    );
                   },
                   child: Text(
                     'Belum punya akun? Daftar di sini',
                     style: TextStyle(color: theme.colorScheme.primary),
                   ),
-                )
+                ),
               ],
             ),
           ),

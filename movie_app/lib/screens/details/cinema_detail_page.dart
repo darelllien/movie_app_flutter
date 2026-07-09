@@ -224,10 +224,13 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
             return MovieCard(
               movie: movie,
               onBuyPressed: () {
+                // Menghubungkan parameter jadwal default yang valid dan aman
                 TicketBottomSheet.show(
                   context,
                   movieTitle: movie.title,
                   cinemaName: widget.cinema.name,
+                  selectedDate: '10 Jul', // Jadwal default hari ini
+                  selectedTime: '13:00', // Jadwal default jam pertama
                 );
               },
             );
