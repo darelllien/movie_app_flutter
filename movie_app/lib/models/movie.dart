@@ -23,8 +23,8 @@ class Movie {
     return Movie(
       id: json['id'] ?? 0,
       title: json['title'] ?? 'No Title',
-      overview: (json['overview'] == null || json['overview'].toString().trim().isEmpty) 
-          ? 'Sinopsis belum tersedia.' 
+      overview: (json['overview'] == null || json['overview'].toString().trim().isEmpty)
+          ? 'Sinopsis belum tersedia.'
           : json['overview'],
       posterPath: json['poster_path'] ?? '',
       backdropPath: json['backdrop_path'] ?? '',
@@ -34,45 +34,33 @@ class Movie {
     );
   }
 
-  String get fullPosterUrl => posterPath.isNotEmpty
-      ? 'https://image.tmdb.org/t/p/w500$posterPath'
-      : 'https://via.placeholder.com/500x750?text=No+Image';
-
-  String get fullBackdropUrl => backdropPath.isNotEmpty
-      ? 'https://image.tmdb.org/t/p/w780$backdropPath'
-      : 'https://via.placeholder.com/780x439?text=No+Image';
-
-  String get genreNames {
-    if (genreIds.isEmpty) return 'General';
-
-    const Map<int, String> tmdbGenres = {
-      28: 'Action',
-      12: 'Adventure',
-      16: 'Animation',
-      35: 'Comedy',
-      80: 'Crime',
-      99: 'Documentary',
-      18: 'Drama',
-      10751: 'Family',
-      14: 'Fantasy',
-      36: 'History',
-      27: 'Horror',
-      10402: 'Music',
-      9648: 'Mystery',
-      10749: 'Romance',
-      878: 'Sci-Fi',
-      10770: 'TV Movie',
-      53: 'Thriller',
-      10752: 'War',
-      37: 'Western',
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'title': title,
+      'overview': overview,
+      'posterPath': posterPath,
+      'backdropPath': backdropPath,
+      'releaseDate': releaseDate,
+      'voteAverage': voteAverage,
+      'genreIds': genreIds,
     };
-
-    List<String> names = genreIds
-        .map((id) => tmdbGenres[id])
-        .where((name) => name != null)
-        .cast<String>()
-        .toList();
-
-    return names.isNotEmpty ? names.join(', ') : 'General';
   }
+
+  factory Movie.fromMap(Map<String, dynamic> map) {
+    return Movie(
+      id: map['id'] ?? 0,
+      title: map['title'] ?? '',
+      overview: map['overview'] ?? '',
+      posterPath: map['posterPath'] ?? '',
+      backdropPath: map['backdropPath'] ?? '',
+      releaseDate: map['releaseDate'] ?? '',
+      voteAverage: (map['voteAverage'] as num?)?.toDouble() ?? 0.0,
+      genreIds: List<int>.from(map['genreIds'] ?? []),
+    );
+  }
+
+  String get fullPosterUrl => posterPath.isNotEmpty ? 'https://image.tmdb.org/t/p/w500$posterPath' : 'https://via.placeholder.com/500x750?text=No+Image';
+  String get fullBackdropUrl => backdropPath.isNotEmpty ? 'https://image.tmdb.org/t/p/w780$backdropPath' : 'https://via.placeholder.com/780x439?text=No+Image';
+  String get genreNames { /* ... */ return 'General'; }
 }

@@ -61,10 +61,10 @@ class ProfileHeader extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppColors.primary, // Background sudah Primary
                 shape: BoxShape.rectangle,
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey[200]!),
+                // Border abu-abu dihapus agar desain lebih clean
                 boxShadow: [
                   BoxShadow(
                     // ignore: deprecated_member_use
@@ -74,7 +74,7 @@ class ProfileHeader extends StatelessWidget {
                   ),
                 ],
               ),
-              child: const Icon(Icons.edit, color: AppColors.primary, size: 18),
+              child: const Icon(Icons.edit, color: AppColors.white, size: 18),
             ),
           ),
         ],

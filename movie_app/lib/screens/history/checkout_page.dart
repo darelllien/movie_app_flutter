@@ -415,18 +415,26 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
+          clipBehavior: Clip.antiAlias, // Penting agar background putih konten tidak menutupi border melengkung
           decoration: BoxDecoration(
-            // ignore: deprecated_member_use
-            color: isSelected ? AppColors.base.withOpacity(0.12) : Colors.white,
+            color: AppColors.primary, // Background header warna primer
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(
-              color: isSelected ? AppColors.primary : Colors.transparent,
-              width: isSelected ? 2.0 : 1.5,
-            ),
+            boxShadow: [
+              if (isSelected)
+                BoxShadow(
+                  // ignore: deprecated_member_use
+                  color: AppColors.primary.withOpacity(0.3),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                )
+            ],
           ),
           child: Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: ExpansionTile(
+              // Menyesuaikan warna header saat collapse maupun expand
+              backgroundColor: AppColors.primary,
+              collapsedBackgroundColor: AppColors.primary,
               onExpansionChanged: (expanded) {
                 setState(() {
                   _selectedMethodId = method.id;
@@ -435,122 +443,121 @@ class _CheckoutPageState extends State<CheckoutPage> {
               },
               leading: Icon(
                 method.icon,
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                color: Colors.white, // Ikon warna putih
                 size: 22,
               ),
               title: Text(
                 method.name,
                 style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                  color: Colors.white, // Tulisan header warna putih
                 ),
               ),
-              trailing: Icon(
+              trailing: const Icon(
                 Icons.keyboard_arrow_down,
                 size: 22,
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
+                color: Colors.white, // Ikon panah putih
               ),
+              // AREA KONTEN DROPDOWN
               children: [
-                if (isFolder)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 4,
-                    ),
-                    child: Column(
-                      children: method.subBanks!.map((bank) {
-                        final isBankSelected = _selectedSubBankId == bank.id;
+                Container(
+                  width: double.infinity,
+                  color: Colors.white, // Background tulisan pada dropdown warna putih
+                  child: Column(
+                    children: [
+                      if (isFolder)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 8,
+                          ),
+                          child: Column(
+                            children: method.subBanks!.map((bank) {
+                              final isBankSelected = _selectedSubBankId == bank.id;
 
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 8),
-                          decoration: BoxDecoration(
-                            color: isBankSelected
-                                ? Colors.white
-                                : const Color(0xFFF9FAFB),
-                            borderRadius: BorderRadius.circular(10),
-                            border: Border.all(
-                              color: isBankSelected
-                                  ? AppColors.primary
-                                  : Colors.grey[200]!,
-                              width: isBankSelected ? 2.0 : 1.0,
-                            ),
-                          ),
-                          child: Theme(
-                            data: Theme.of(
-                              context,
-                            ).copyWith(dividerColor: Colors.transparent),
-                            child: ExpansionTile(
-                              onExpansionChanged: (expanded) {
-                                if (expanded) {
-                                  setState(() => _selectedSubBankId = bank.id);
-                                }
-                              },
-                              title: Text(
-                                bank.name,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
+                              return Container(
+                                margin: const EdgeInsets.only(bottom: 8),
+                                decoration: BoxDecoration(
                                   color: isBankSelected
-                                      ? AppColors.primary
-                                      : Colors.black87,
-                                ),
-                              ),
-                              children: [
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.fromLTRB(
-                                    16,
-                                    0,
-                                    16,
-                                    14,
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: bank.instructions.map((step) {
-                                      return Padding(
-                                        padding: const EdgeInsets.only(
-                                          bottom: 4,
-                                        ),
-                                        child: Text(
-                                          step,
-                                          style: AppTextStyles.caption.copyWith(
-                                            color: AppColors.textSecondary,
-                                            height: 1.4,
-                                          ),
-                                        ),
-                                      );
-                                    }).toList(),
+                                      ? Colors.white
+                                      : const Color(0xFFF9FAFB),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(
+                                    color: isBankSelected
+                                        ? AppColors.primary
+                                        : Colors.grey[300]!,
+                                    width: isBankSelected ? 2.0 : 1.0,
                                   ),
                                 ),
-                              ],
-                            ),
+                                child: Theme(
+                                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                                  child: ExpansionTile(
+                                    onExpansionChanged: (expanded) {
+                                      if (expanded) {
+                                        setState(() => _selectedSubBankId = bank.id);
+                                      }
+                                    },
+                                    title: Text(
+                                      bank.name,
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: isBankSelected
+                                            ? AppColors.primary
+                                            : Colors.black, // Tulisan biasa hitam
+                                      ),
+                                    ),
+                                    children: [
+                                      Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: bank.instructions.map((step) {
+                                            return Padding(
+                                              padding: const EdgeInsets.only(bottom: 4),
+                                              child: Text(
+                                                step,
+                                                style: AppTextStyles.caption.copyWith(
+                                                  color: Colors.black87, // Tulisan instruksi hitam
+                                                  height: 1.4,
+                                                ),
+                                              ),
+                                            );
+                                          }).toList(),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ),
-                        );
-                      }).toList(),
-                    ),
-                  )
-                else if (method.mainInstructions != null)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: method.mainInstructions!.map((step) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Text(
-                            step,
-                            style: AppTextStyles.caption.copyWith(
-                              color: AppColors.textSecondary,
-                              height: 1.4,
-                              fontSize: 11,
-                            ),
+                        )
+                      else if (method.mainInstructions != null)
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.fromLTRB(16, 16, 16, 20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: method.mainInstructions!.map((step) {
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 6),
+                                child: Text(
+                                  step,
+                                  style: AppTextStyles.caption.copyWith(
+                                    color: Colors.black, // Tulisan instruksi biasa hitam
+                                    height: 1.4,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              );
+                            }).toList(),
                           ),
-                        );
-                      }).toList(),
-                    ),
+                        ),
+                    ],
                   ),
+                ),
               ],
             ),
           ),

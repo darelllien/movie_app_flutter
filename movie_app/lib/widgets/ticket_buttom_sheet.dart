@@ -208,7 +208,7 @@ class _TicketBottomSheetState extends State<TicketBottomSheet> {
           'Pilih Kursi',
           style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
-        centerTitle: true,
+        centerTitle: false,
       ),
       body: Column(
         children: [

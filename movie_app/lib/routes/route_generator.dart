@@ -42,9 +42,7 @@ class RouteGenerator {
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
-            body: Center(
-              child: Text('Rute tidak ditemukan: ${settings.name}'),
-            ),
+            body: Center(child: Text('Rute tidak ditemukan: ${settings.name}')),
           ),
         );
     }
