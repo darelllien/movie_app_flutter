@@ -56,7 +56,7 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
 
     return selectedMovies.map((m) {
       allPossibleShowtimes.shuffle(random);
-      final showtimeCount = random.nextInt(4) + 3; // 3 to 6 showtimes
+      final showtimeCount = random.nextInt(4) + 3;
       var times = allPossibleShowtimes.take(showtimeCount).toList();
       times.sort();
       return {'movie': m, 'showtimes': times};
@@ -495,7 +495,7 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
               crossAxisCount: 4,
               crossAxisSpacing: 8,
               mainAxisSpacing: 8,
-              childAspectRatio: 2.2, // Adjust aspect ratio for buttons
+              childAspectRatio: 2.2,
             ),
             itemCount: showtimes.length,
             itemBuilder: (context, index) {

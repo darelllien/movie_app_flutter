@@ -67,7 +67,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
       minute = int.parse(widget.time.split(':')[1]);
     } catch (_) {}
 
-    // Cari bagian ini di dalam void _showSuccessPopup(String paymentName, int grandTotal)
     final newTx = TransactionModel(
       id: 'TX-${DateTime.now().millisecondsSinceEpoch}',
       movie: widget.movie,
@@ -116,7 +115,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            // ignore: deprecated_member_use
                             color: Colors.green.withOpacity(0.2),
                             blurRadius: 12,
                             offset: const Offset(0, 6),
@@ -175,7 +173,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         ),
                         onPressed: () {
                           Navigator.of(context).pop();
-                          // Mengembalikan user ke root utama aplikasi secara bersih
                           Navigator.popUntil(context, (route) => route.isFirst);
                         },
                         child: Text(
@@ -286,7 +283,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.02),
             blurRadius: 10,
             offset: const Offset(0, 4),
@@ -415,14 +411,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
-          clipBehavior: Clip.antiAlias, // Penting agar background putih konten tidak menutupi border melengkung
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            color: AppColors.primary, // Background header warna primer
+            color: AppColors.primary,
             borderRadius: BorderRadius.circular(14),
             boxShadow: [
               if (isSelected)
                 BoxShadow(
-                  // ignore: deprecated_member_use
                   color: AppColors.primary.withOpacity(0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
@@ -432,7 +427,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
           child: Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: ExpansionTile(
-              // Menyesuaikan warna header saat collapse maupun expand
               backgroundColor: AppColors.primary,
               collapsedBackgroundColor: AppColors.primary,
               onExpansionChanged: (expanded) {
@@ -443,26 +437,25 @@ class _CheckoutPageState extends State<CheckoutPage> {
               },
               leading: Icon(
                 method.icon,
-                color: Colors.white, // Ikon warna putih
+                color: Colors.white,
                 size: 22,
               ),
               title: Text(
                 method.name,
                 style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.white, // Tulisan header warna putih
+                  color: Colors.white,
                 ),
               ),
               trailing: const Icon(
                 Icons.keyboard_arrow_down,
                 size: 22,
-                color: Colors.white, // Ikon panah putih
+                color: Colors.white,
               ),
-              // AREA KONTEN DROPDOWN
               children: [
                 Container(
                   width: double.infinity,
-                  color: Colors.white, // Background tulisan pada dropdown warna putih
+                  color: Colors.white,
                   child: Column(
                     children: [
                       if (isFolder)
@@ -504,7 +497,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                         fontWeight: FontWeight.bold,
                                         color: isBankSelected
                                             ? AppColors.primary
-                                            : Colors.black, // Tulisan biasa hitam
+                                            : Colors.black,
                                       ),
                                     ),
                                     children: [
@@ -519,7 +512,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                               child: Text(
                                                 step,
                                                 style: AppTextStyles.caption.copyWith(
-                                                  color: Colors.black87, // Tulisan instruksi hitam
+                                                  color: Colors.black87,
                                                   height: 1.4,
                                                 ),
                                               ),
@@ -546,7 +539,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 child: Text(
                                   step,
                                   style: AppTextStyles.caption.copyWith(
-                                    color: Colors.black, // Tulisan instruksi biasa hitam
+                                    color: Colors.black,
                                     height: 1.4,
                                     fontSize: 12,
                                   ),

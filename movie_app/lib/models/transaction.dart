@@ -1,6 +1,6 @@
-import 'dart:convert'; // WAJIB UNTUK jsonEncode & jsonDecode
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart'; // WAJIB
+import 'package:shared_preferences/shared_preferences.dart';
 import 'movie.dart';
 import 'cinema.dart';
 
@@ -29,12 +29,11 @@ class TransactionModel {
 
   int get totalPrice => ticketCount * pricePerTicket;
 
-  // 1. Fungsi untuk mengubah Objek ke Map (untuk JSON)
   Map<String, dynamic> toMap() {
     return {
       'id': id,
-      'movie': movie.toMap(), // Catatan: Model Movie kamu harus punya fungsi toMap() juga
-      'cinema': cinema.toMap(), // Catatan: Model Cinema kamu harus punya fungsi toMap() juga
+      'movie': movie.toMap(),
+      'cinema': cinema.toMap(),
       'ticketCount': ticketCount,
       'pricePerTicket': pricePerTicket,
       'transactionDate': transactionDate.toIso8601String(),
@@ -44,12 +43,11 @@ class TransactionModel {
     };
   }
 
-  // 2. Fungsi untuk mengubah Map kembali menjadi Objek
   factory TransactionModel.fromMap(Map<String, dynamic> map) {
     return TransactionModel(
       id: map['id'],
-      movie: Movie.fromMap(map['movie']), // Catatan: Model Movie kamu harus punya Movie.fromMap()
-      cinema: Cinema.fromMap(map['cinema']), // Catatan: Model Cinema kamu harus punya Cinema.fromMap()
+      movie: Movie.fromMap(map['movie']),
+      cinema: Cinema.fromMap(map['cinema']),
       ticketCount: map['ticketCount'],
       pricePerTicket: map['pricePerTicket'],
       transactionDate: DateTime.parse(map['transactionDate']),
@@ -66,7 +64,6 @@ class TransactionState extends ChangeNotifier {
     return _instance;
   }
 
-  // Constructor internal otomatis memuat data lama dari HP saat aplikasi dinyalakan
   TransactionState._internal() {
     loadTransactions();
   }
@@ -75,13 +72,9 @@ class TransactionState extends ChangeNotifier {
 
   List<TransactionModel> get history => _history;
 
-  // ================= LOGIKA SHAREDPREFERENCES =================
-
-  // Fungsi untuk MENYIMPAN seluruh transaksi ke memori HP
   Future<void> saveTransactions() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      // Mengubah List<TransactionModel> menjadi String JSON
       final String encodedData = jsonEncode(
         _history.map((tx) => tx.toMap()).toList(),
       );
@@ -91,7 +84,6 @@ class TransactionState extends ChangeNotifier {
     }
   }
 
-  // Fungsi untuk MEMUAT data lama dari memori HP saat aplikasi dibuka
   Future<void> loadTransactions() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -103,18 +95,17 @@ class TransactionState extends ChangeNotifier {
         _history.addAll(
           decodedData.map((item) => TransactionModel.fromMap(item)).toList(),
         );
-        notifyListeners(); // Memicu halaman ProfileTab untuk rebuild menampilkan data lama
+        notifyListeners();
       }
     } catch (e) {
       debugPrint("Gagal memuat transaksi: $e");
     }
   }
 
-  // =============================================================
 
   void addTransaction(TransactionModel transaction) {
     _history.insert(0, transaction);
-    saveTransactions(); // <--- OTOMATIS SIMPAN setelah beli tiket baru
+    saveTransactions();
     notifyListeners();
   }
 
@@ -122,7 +113,7 @@ class TransactionState extends ChangeNotifier {
     final index = _history.indexWhere((tx) => tx.id == txId);
     if (index != -1) {
       _history[index].isScanned = true;
-      saveTransactions(); // <--- OTOMATIS SIMPAN setelah status tiket berubah
+      saveTransactions();
       notifyListeners();
     }
   }

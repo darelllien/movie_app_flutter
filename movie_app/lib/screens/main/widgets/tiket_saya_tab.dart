@@ -100,10 +100,8 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            // ignore: deprecated_member_use
                             color: _getStatusColor(
                               currentStatus,
-                              // ignore: deprecated_member_use
                             ).withOpacity(0.12),
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -348,13 +346,11 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
     final int total = (tx.ticketCount * tx.pricePerTicket) + 3000;
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
-      // ignore: deprecated_member_use
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            // ignore: deprecated_member_use
             color: Colors.black.withOpacity(0.02),
             blurRadius: 6,
             offset: const Offset(0, 3),
@@ -399,14 +395,12 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          // ignore: deprecated_member_use
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              // ignore: deprecated_member_use
                               color: color.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
@@ -481,11 +475,9 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
   }
 
   Widget _badge(IconData icon, String text) {
-    // ignore: deprecated_member_use
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        // ignore: deprecated_member_use
         color: AppColors.base.withOpacity(0.12),
         borderRadius: BorderRadius.circular(5),
       ),

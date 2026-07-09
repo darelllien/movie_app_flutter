@@ -31,7 +31,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.currentName);
-    // Memicu rebuild ketika ada perubahan teks untuk memunculkan/menyembunyikan tombol silang
     _nameController.addListener(() => setState(() {}));
     _selectedImagePath = widget.currentImagePath;
   }
@@ -55,7 +54,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
     } catch (e) {
       ScaffoldMessenger.of(
-        // ignore: use_build_context_synchronously
         context,
       ).showSnackBar(SnackBar(content: Text('Gagal mengambil gambar: $e')));
     }
@@ -134,7 +132,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 children: [
                   CircleAvatar(
                     radius: 60,
-                    // ignore: deprecated_member_use
                     backgroundColor: AppColors.primary.withOpacity(0.1),
                     backgroundImage: _selectedImagePath != null
                         ? FileImage(File(_selectedImagePath!))
@@ -168,7 +165,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
             const SizedBox(height: 40),
 
-            // ==================== 1. KOLOM ISIAN NAMA (DENGAN BORDER SEPERTI GAMBAR) ====================
             TextFormField(
               controller: _nameController,
               style: const TextStyle(fontSize: 16, color: Colors.black87),
@@ -180,7 +176,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   horizontal: 16,
                   vertical: 16,
                 ),
-                // Desain border default (Saat tidak ditekan - Gambar 2)
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: BorderSide(
@@ -188,12 +183,10 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     width: 1.5,
                   ),
                 ),
-                // Desain border ketika dipilih/difokuskan (Gambar 1 - menggunakan warna hijau/teal)
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(16),
                   borderSide: const BorderSide(color: Colors.green, width: 1.5),
                 ),
-                // Tombol silang untuk menghapus teks instan di sebelah kanan
                 suffixIcon: _nameController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.cancel, color: Colors.grey),
@@ -204,7 +197,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
             const SizedBox(height: 24),
 
-            // ==================== 2. KOLOM ISIAN EMAIL (READ ONLY) ====================
             TextFormField(
               initialValue: widget.currentEmail,
               readOnly: true,
@@ -237,7 +229,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
             ),
             const SizedBox(height: 48),
 
-            // Tombol Simpan Perubahan
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(

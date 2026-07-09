@@ -309,9 +309,8 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               ],
             ),
 
-            const SizedBox(height: 120), // <-- Jarak gap sudah dikurangi di sini
+            const SizedBox(height: 120),
 
-            // TABS
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -371,7 +370,6 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               ),
             ),
 
-            // CONTENT
             _isSynopsisTab ? _buildSynopsisContent() : _buildJadwalContent(),
           ],
         ),
@@ -577,7 +575,6 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                 itemBuilder: (context, index) {
                   final date = _baseDate.add(Duration(days: index));
 
-                  // --- LOGIKA DISABLE TANGGAL ---
                   final isToday = index == 0;
                   final isSelected = date.day == _selectedDate.day && date.month == _selectedDate.month;
                   String dayLabel = isToday ? 'HARI INI' : _getDayName(date.weekday);
@@ -590,7 +587,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                         _selectedShowtime = null;
                       });
                     }
-                        : null, // Mematikan fungsi klik untuk besok dkk
+                        : null,
                     child: Container(
                       width: 80,
                       margin: const EdgeInsets.only(right: 12),
