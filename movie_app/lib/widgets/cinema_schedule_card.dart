@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:movie_app/constants/app_color.dart';
 import 'package:movie_app/constants/app_text_styles.dart';
@@ -25,6 +26,15 @@ class CinemaScheduleCard extends StatelessWidget {
     final allShowtimes = cinema['showtimes'] as List<String>;
     List<String> displayedShowtimes = allShowtimes.length > 6 ? allShowtimes.sublist(0, 6) : allShowtimes;
 
+    final random = math.Random(cinema['cinemaName'].hashCode);
+    final List<String> soldOutShowtimes = [];
+
+    for (String time in allShowtimes) {
+      if (random.nextDouble() < 0.3) {
+        soldOutShowtimes.add(time);
+      }
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -39,7 +49,6 @@ class CinemaScheduleCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // CINEMA HEADER
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -65,8 +74,7 @@ class CinemaScheduleCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              
-              // TYPE & PRICE
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -86,23 +94,28 @@ class CinemaScheduleCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              
-              // SHOWTIMES GRID
+
               Wrap(
                 spacing: 12,
                 runSpacing: 12,
                 children: [
                   ...displayedShowtimes.map((time) {
                     final isSelected = selectedCinemaName == cinema['cinemaName'] && selectedShowtime == time;
+                    final isSoldOut = soldOutShowtimes.contains(time);
+
                     return GestureDetector(
-                      onTap: () => onShowtimeSelected(cinema['cinemaName']!, time),
+                      onTap: isSoldOut ? null : () => onShowtimeSelected(cinema['cinemaName']!, time),
                       child: Container(
                         width: (MediaQuery.of(context).size.width - 32 - 36) / 4,
                         padding: const EdgeInsets.symmetric(vertical: 8),
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primary : Colors.white,
+                          color: isSoldOut
+                              ? Colors.grey[100]
+                              : (isSelected ? AppColors.primary : Colors.white),
                           border: Border.all(
-                            color: isSelected ? AppColors.primary : Colors.grey[300]!,
+                            color: isSoldOut
+                                ? Colors.grey[300]!
+                                : (isSelected ? AppColors.primary : Colors.grey[300]!),
                           ),
                           borderRadius: BorderRadius.circular(6),
                         ),
@@ -110,7 +123,9 @@ class CinemaScheduleCard extends StatelessWidget {
                         child: Text(
                           time,
                           style: AppTextStyles.bodyMedium.copyWith(
-                            color: isSelected ? Colors.white : AppColors.textPrimary,
+                            color: isSoldOut
+                                ? Colors.grey[400]
+                                : (isSelected ? Colors.white : AppColors.textPrimary),
                             fontWeight: FontWeight.bold,
                           ),
                         ),

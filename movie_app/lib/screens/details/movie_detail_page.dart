@@ -20,9 +20,12 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   bool _isSynopsisTab = true;
   final DateTime _baseDate = DateTime(2026, 7, 10);
   late DateTime _selectedDate = _baseDate;
+
   String? _selectedCinemaName;
   String? _selectedShowtime;
-  String _selectedCity = 'BEKASI';
+
+  String _selectedCity = 'SEMUA';
+  bool _isDropdownOpen = false;
 
   List<Map<String, String>> _cast = [];
   String _director = 'Memuat...';
@@ -53,7 +56,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
 
       final crewData = credits['crew'] as List;
       final directorNode = crewData.firstWhere(
-        (c) => c['job'] == 'Director',
+            (c) => c['job'] == 'Director',
         orElse: () => {'name': '-'},
       );
       final producers = crewData
@@ -82,18 +85,8 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
 
   String _getMonthName(int month) {
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'Mei',
-      'Jun',
-      'Jul',
-      'Agu',
-      'Sep',
-      'Okt',
-      'Nov',
-      'Des',
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
     ];
     return months[month - 1];
   }
@@ -103,14 +96,56 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
     return days[weekday - 1];
   }
 
+  bool _isUpcomingMovie() {
+    if (widget.movie.releaseDate.isEmpty) return false;
+    try {
+      final releaseDate = DateTime.parse(widget.movie.releaseDate);
+      return releaseDate.isAfter(DateTime.now());
+    } catch (e) {
+      return false;
+    }
+  }
+
+  bool _isMovieStillAiring() {
+    if (widget.movie.releaseDate.isEmpty) return false;
+    try {
+      final releaseDate = DateTime.parse(widget.movie.releaseDate);
+      final currentDate = DateTime.now();
+
+      if (releaseDate.isAfter(currentDate)) return false;
+
+      final differenceInDays = currentDate.difference(releaseDate).inDays;
+      return differenceInDays <= 60;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  List<dynamic> get _filteredSchedules {
+    if (_selectedCity == 'SEMUA') {
+      return DummyData.cinemaSchedules;
+    }
+    return DummyData.cinemaSchedules.where((cinema) {
+      return cinema['city'].toString().toUpperCase() == _selectedCity;
+    }).toList();
+  }
+
+  List<String> get _availableCities {
+    final cities = DummyData.cinemaSchedules
+        .map((cinema) => cinema['city'].toString().toUpperCase())
+        .toSet()
+        .toList();
+    cities.sort();
+    return ['SEMUA', ...cities];
+  }
+
   @override
   Widget build(BuildContext context) {
     final genres = widget.movie.genreNames.split(', ').take(2).toList();
-
     final isTicketActive = !_isSynopsisTab && _selectedShowtime != null;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,11 +170,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                           gradient: LinearGradient(
                             begin: Alignment.topCenter,
                             end: Alignment.bottomCenter,
-                            colors: [
-                              Colors.black54,
-                              Colors.transparent,
-                              Colors.black87,
-                            ],
+                            colors: [Colors.black54, Colors.transparent, Colors.black87],
                           ),
                         ),
                       ),
@@ -150,11 +181,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                             color: Colors.white.withValues(alpha: 0.3),
                           ),
                           padding: const EdgeInsets.all(12),
-                          child: const Icon(
-                            Icons.play_arrow,
-                            color: Colors.white,
-                            size: 40,
-                          ),
+                          child: const Icon(Icons.play_arrow, color: Colors.white, size: 40),
                         ),
                       ),
                     ],
@@ -164,11 +191,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                   top: MediaQuery.of(context).padding.top + 8,
                   left: 8,
                   child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                      size: 28,
-                    ),
+                    icon: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
                     onPressed: () => Navigator.pop(context),
                   ),
                 ),
@@ -194,13 +217,8 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                         height: 160,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => Container(
-                          width: 110,
-                          height: 160,
-                          color: AppColors.primary,
-                          child: const Icon(
-                            Icons.broken_image,
-                            color: AppColors.white,
-                          ),
+                          width: 110, height: 160, color: AppColors.primary,
+                          child: const Icon(Icons.broken_image, color: AppColors.white),
                         ),
                       ),
                     ),
@@ -215,14 +233,10 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                     children: [
                       Row(
                         children: [
-                          const Icon(
-                            Icons.star,
-                            color: AppColors.cta,
-                            size: 18,
-                          ),
+                          const Icon(Icons.star, color: AppColors.cta, size: 18),
                           const SizedBox(width: 4),
                           Text(
-                            widget.movie.voteAverage.toStringAsFixed(1),
+                            _isUpcomingMovie() ? '-' : widget.movie.voteAverage.toStringAsFixed(1),
                             style: AppTextStyles.bodyMedium.copyWith(
                               color: AppColors.textPrimary,
                               fontWeight: FontWeight.bold,
@@ -246,22 +260,12 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                         runSpacing: 8,
                         children: genres.map((genre) {
                           return Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              border: Border.all(
-                                color: AppColors.textSecondary,
-                              ),
+                              border: Border.all(color: AppColors.textSecondary),
                               borderRadius: BorderRadius.circular(16),
                             ),
-                            child: Text(
-                              genre,
-                              style: AppTextStyles.caption.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
+                            child: Text(genre, style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary)),
                           );
                         }).toList(),
                       ),
@@ -271,15 +275,13 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               ],
             ),
 
-            const SizedBox(height: 146),
+            const SizedBox(height: 120), // <-- Jarak gap sudah dikurangi di sini
 
             // TABS
             Container(
               decoration: BoxDecoration(
                 color: Colors.white,
-                border: Border(
-                  bottom: BorderSide(color: Colors.grey[300]!, width: 1),
-                ),
+                border: Border(bottom: BorderSide(color: Colors.grey[300]!, width: 1)),
               ),
               child: Row(
                 children: [
@@ -291,9 +293,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                         decoration: BoxDecoration(
                           border: Border(
                             bottom: BorderSide(
-                              color: _isSynopsisTab
-                                  ? AppColors.primary
-                                  : Colors.grey[300]!,
+                              color: _isSynopsisTab ? AppColors.primary : Colors.grey[300]!,
                               width: 2,
                             ),
                           ),
@@ -302,9 +302,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                           child: Text(
                             'SINOPSIS',
                             style: AppTextStyles.headingSmall.copyWith(
-                              color: _isSynopsisTab
-                                  ? AppColors.primary
-                                  : Colors.grey,
+                              color: _isSynopsisTab ? AppColors.primary : Colors.grey,
                             ),
                           ),
                         ),
@@ -319,9 +317,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                         decoration: BoxDecoration(
                           border: Border(
                             bottom: BorderSide(
-                              color: !_isSynopsisTab
-                                  ? AppColors.primary
-                                  : Colors.grey[300]!,
+                              color: !_isSynopsisTab ? AppColors.primary : Colors.grey[300]!,
                               width: 2,
                             ),
                           ),
@@ -330,9 +326,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                           child: Text(
                             'JADWAL',
                             style: AppTextStyles.headingSmall.copyWith(
-                              color: !_isSynopsisTab
-                                  ? AppColors.primary
-                                  : Colors.grey,
+                              color: !_isSynopsisTab ? AppColors.primary : Colors.grey,
                             ),
                           ),
                         ),
@@ -343,7 +337,6 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               ),
             ),
 
-            // CONTENT
             // CONTENT
             _isSynopsisTab ? _buildSynopsisContent() : _buildJadwalContent(),
           ],
@@ -365,36 +358,25 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
           ),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: isTicketActive
-                  ? AppColors.cta
-                  : Colors.grey[400],
-              foregroundColor: isTicketActive
-                  ? AppColors.textOnCta
-                  : Colors.white,
+              backgroundColor: isTicketActive ? AppColors.cta : Colors.grey[400],
+              foregroundColor: isTicketActive ? AppColors.textOnCta : Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
               elevation: 0,
             ),
             onPressed: isTicketActive
                 ? () {
-                    String formattedDateStr =
-                        "${_selectedDate.day} ${_getMonthName(_selectedDate.month)}";
-
-                    TicketBottomSheet.show(
-                      context,
-                      movieTitle: widget.movie.title,
-                      cinemaName: _selectedCinemaName ?? 'Bioskop',
-                      selectedDate: formattedDateStr,
-                      selectedTime: _selectedShowtime!,
-                    );
-                  }
+              String formattedDateStr = "${_selectedDate.day} ${_getMonthName(_selectedDate.month)}";
+              TicketBottomSheet.show(
+                context,
+                movieTitle: widget.movie.title,
+                cinemaName: _selectedCinemaName ?? 'Bioskop',
+                selectedDate: formattedDateStr,
+                selectedTime: _selectedShowtime!,
+              );
+            }
                 : null,
-            child: Text(
-              'BELI TIKET',
-              style: AppTextStyles.button.copyWith(fontSize: 16),
-            ),
+            child: Text('BELI TIKET', style: AppTextStyles.button.copyWith(fontSize: 16)),
           ),
         ),
       ),
@@ -412,22 +394,14 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
-              (widget.movie.overview.isEmpty ||
-                      widget.movie.overview.toLowerCase().contains(
-                        'belum tersedia',
-                      ))
+              (widget.movie.overview.isEmpty || widget.movie.overview.toLowerCase().contains('belum tersedia'))
                   ? 'Film fiksi fana yang mengisahkan sebuah petualangan seru penuh dengan drama, aksi, dan intrik yang memukau. Para karakter akan dibawa ke dalam petualangan emosional dalam menghadapi berbagai konflik batin serta tantangan hidup yang tak terduga untuk mencapai tujuan akhir mereka. Karya sinematik ini menyajikan visual yang indah dan alur cerita yang sangat tidak bisa ditebak.'
                   : widget.movie.overview,
-              style: AppTextStyles.bodyMedium.copyWith(
-                color: AppColors.textPrimary,
-                height: 1.5,
-              ),
+              style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary, height: 1.5),
               textAlign: TextAlign.justify,
             ),
           ),
           const SizedBox(height: 24),
-
-          // CREW (Producer & Director)
           const Divider(height: 1),
           const SizedBox(height: 16),
           Padding(
@@ -437,37 +411,22 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
               children: [
                 Text('Produser', style: AppTextStyles.headingSmall),
                 const SizedBox(height: 4),
-                Text(
-                  _producer,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
+                Text(_producer, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary)),
                 const SizedBox(height: 16),
                 Text('Sutradara', style: AppTextStyles.headingSmall),
                 const SizedBox(height: 4),
-                Text(
-                  _director,
-                  style: AppTextStyles.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
+                Text(_director, style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary)),
               ],
             ),
           ),
           const SizedBox(height: 16),
           const Divider(height: 1),
           const SizedBox(height: 24),
-
-          // TOP CAST
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Text(
               'Pemeran',
-              style: AppTextStyles.headingMedium.copyWith(
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.bold,
-              ),
+              style: AppTextStyles.headingMedium.copyWith(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(height: 16),
@@ -480,60 +439,43 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                   : _cast.isEmpty
                   ? const Center(child: Text('Data pemeran belum tersedia.'))
                   : ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: _cast.length,
-                      itemBuilder: (context, index) {
-                        final cast = _cast[index];
-                        return Container(
-                          width: 90,
-                          margin: const EdgeInsets.only(right: 16),
-                          child: Column(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.network(
-                                  cast['image']!,
-                                  width: 90,
-                                  height: 110,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, err, stack) =>
-                                      Container(
-                                        width: 90,
-                                        height: 110,
-                                        color: Colors.grey[300],
-                                        child: const Icon(
-                                          Icons.person,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
-                                ),
-                              ),
-                              const SizedBox(height: 8),
-                              Text(
-                                cast['name']!,
-                                style: AppTextStyles.bodySmall.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                cast['role']!,
-                                style: AppTextStyles.caption.copyWith(
-                                  color: AppColors.textSecondary,
-                                ),
-                                textAlign: TextAlign.center,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ],
+                scrollDirection: Axis.horizontal,
+                itemCount: _cast.length,
+                itemBuilder: (context, index) {
+                  final cast = _cast[index];
+                  return Container(
+                    width: 90,
+                    margin: const EdgeInsets.only(right: 16),
+                    child: Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            cast['image']!,
+                            width: 90, height: 110, fit: BoxFit.cover,
+                            errorBuilder: (context, err, stack) => Container(
+                              width: 90, height: 110, color: Colors.grey[300],
+                              child: const Icon(Icons.person, color: Colors.grey),
+                            ),
                           ),
-                        );
-                      },
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          cast['name']!,
+                          style: AppTextStyles.bodySmall.copyWith(fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                          textAlign: TextAlign.center, maxLines: 2, overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          cast['role']!,
+                          style: AppTextStyles.caption.copyWith(color: AppColors.textSecondary),
+                          textAlign: TextAlign.center, maxLines: 1, overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ),
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(height: 24),
@@ -543,6 +485,48 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
   }
 
   Widget _buildJadwalContent() {
+    if (_isUpcomingMovie()) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 80.0, horizontal: 20.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.calendar_month, size: 80, color: Colors.grey),
+              const SizedBox(height: 16),
+              Text(
+                'Maaf, film ini belum tayang di bioskop.',
+                style: AppTextStyles.headingSmall.copyWith(color: AppColors.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    if (!_isMovieStillAiring()) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 80.0, horizontal: 20.0),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.event_busy, size: 80, color: Colors.grey),
+              const SizedBox(height: 16),
+              Text(
+                'Maaf, film ini sudah tidak tayang di bioskop.',
+                style: AppTextStyles.headingSmall.copyWith(color: AppColors.textSecondary),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final schedules = _filteredSchedules;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -558,31 +542,27 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                 itemCount: 7,
                 itemBuilder: (context, index) {
                   final date = _baseDate.add(Duration(days: index));
-                  final isSelected =
-                      date.day == _selectedDate.day &&
-                      date.month == _selectedDate.month;
 
-                  String dayLabel = (index == 0)
-                      ? 'HARI INI'
-                      : _getDayName(date.weekday);
+                  // --- LOGIKA DISABLE TANGGAL ---
+                  final isToday = index == 0;
+                  final isSelected = date.day == _selectedDate.day && date.month == _selectedDate.month;
+                  String dayLabel = isToday ? 'HARI INI' : _getDayName(date.weekday);
 
                   return GestureDetector(
-                    onTap: () {
+                    onTap: isToday
+                        ? () {
                       setState(() {
                         _selectedDate = date;
                         _selectedShowtime = null;
                       });
-                    },
+                    }
+                        : null, // Mematikan fungsi klik untuk besok dkk
                     child: Container(
                       width: 80,
                       margin: const EdgeInsets.only(right: 12),
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.primary : Colors.white,
-                        border: Border.all(
-                          color: isSelected
-                              ? AppColors.primary
-                              : Colors.grey[300]!,
-                        ),
+                        color: isSelected ? AppColors.primary : (isToday ? Colors.white : Colors.grey[100]),
+                        border: Border.all(color: isSelected ? AppColors.primary : Colors.grey[300]!),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Column(
@@ -591,9 +571,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                           Text(
                             '${date.day.toString().padLeft(2, '0')} ${_getMonthName(date.month)}',
                             style: AppTextStyles.bodyMedium.copyWith(
-                              color: isSelected
-                                  ? Colors.white
-                                  : AppColors.textPrimary,
+                              color: isSelected ? Colors.white : (isToday ? AppColors.textPrimary : Colors.grey[400]),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -601,9 +579,7 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
                           Text(
                             dayLabel,
                             style: AppTextStyles.caption.copyWith(
-                              color: isSelected
-                                  ? Colors.white
-                                  : AppColors.textSecondary,
+                              color: isSelected ? Colors.white : (isToday ? AppColors.textSecondary : Colors.grey[400]),
                             ),
                           ),
                         ],
@@ -615,90 +591,94 @@ class _MovieDetailPageState extends State<MovieDetailPage> {
             ),
           ),
         ),
-        const SizedBox(height: 24),
 
-        // CITY DROPDOWN
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            border: Border.symmetric(
-              horizontal: BorderSide(color: Colors.grey[300]!, width: 1),
-            ),
+        PopupMenuButton<String>(
+          initialValue: _selectedCity,
+          constraints: BoxConstraints(
+            minWidth: MediaQuery.of(context).size.width,
+            maxWidth: MediaQuery.of(context).size.width,
           ),
-          child: Row(
-            children: [
-              Icon(Icons.location_on, color: Colors.grey[500]),
-              const SizedBox(width: 12),
-              Expanded(
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    isDense: true,
-                    isExpanded: true,
-                    value: _selectedCity,
-                    icon: Icon(
-                      Icons.keyboard_arrow_down,
-                      color: Colors.grey[500],
-                    ),
-                    style: AppTextStyles.bodyMedium.copyWith(
-                      color: AppColors.textPrimary,
-                      fontSize: 16,
-                    ),
-                    items:
-                        [
-                          'JAKARTA',
-                          'BOGOR',
-                          'DEPOK',
-                          'TANGERANG',
-                          'BEKASI',
-                          'CIREBON',
-                        ].map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                    onChanged: (newValue) {
-                      if (newValue != null) {
-                        setState(() {
-                          _selectedCity = newValue;
-                        });
-                      }
-                    },
+          offset: const Offset(0, 50),
+          color: Colors.white,
+          onOpened: () => setState(() => _isDropdownOpen = true),
+          onCanceled: () => setState(() => _isDropdownOpen = false),
+          onSelected: (String newValue) {
+            setState(() {
+              _selectedCity = newValue;
+              _isDropdownOpen = false;
+              _selectedCinemaName = null;
+              _selectedShowtime = null;
+            });
+          },
+          itemBuilder: (BuildContext context) {
+            return _availableCities.map((String value) {
+              return PopupMenuItem<String>(
+                value: value,
+                child: Text(value, style: AppTextStyles.bodyMedium),
+              );
+            }).toList();
+          },
+          child: Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.base,
+              border: Border.symmetric(
+                horizontal: BorderSide(color: Colors.grey[300]!, width: 1),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.location_on, color: Colors.grey[500]),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    _selectedCity,
+                    style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textPrimary, fontSize: 16),
                   ),
                 ),
-              ),
-            ],
+                Icon(
+                  _isDropdownOpen ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  color: Colors.grey[500],
+                ),
+              ],
+            ),
           ),
         ),
-        const SizedBox(height: 24),
 
-        ...DummyData.cinemaSchedules.take(5).toList().asMap().entries.map((
-          entry,
-        ) {
-          final int index = entry.key;
-          final cinema = entry.value;
-          return CinemaScheduleCard(
-            cinema: cinema,
-            selectedCinemaName: _selectedCinemaName,
-            selectedShowtime: _selectedShowtime,
-            isFirst: index == 0,
-            onShowtimeSelected: (cinemaName, showtime) {
-              setState(() {
-                if (_selectedCinemaName == cinemaName &&
-                    _selectedShowtime == showtime) {
-                  _selectedCinemaName = null;
-                  _selectedShowtime = null;
-                } else {
-                  _selectedCinemaName = cinemaName;
-                  _selectedShowtime = showtime;
-                }
-              });
-            },
-            onViewMore: () {},
-          );
-        }),
+        if (schedules.isEmpty)
+          Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Center(
+              child: Text(
+                'Belum ada jadwal bioskop di $_selectedCity.',
+                style: AppTextStyles.bodyMedium.copyWith(color: AppColors.textSecondary),
+              ),
+            ),
+          )
+        else
+          ...schedules.asMap().entries.map((entry) {
+            final int index = entry.key;
+            final cinema = entry.value;
+            return CinemaScheduleCard(
+              cinema: cinema,
+              selectedCinemaName: _selectedCinemaName,
+              selectedShowtime: _selectedShowtime,
+              isFirst: index == 0,
+              onShowtimeSelected: (cinemaName, showtime) {
+                setState(() {
+                  if (_selectedCinemaName == cinemaName && _selectedShowtime == showtime) {
+                    _selectedCinemaName = null;
+                    _selectedShowtime = null;
+                  } else {
+                    _selectedCinemaName = cinemaName;
+                    _selectedShowtime = showtime;
+                  }
+                });
+              },
+              onViewMore: () {},
+            );
+          }),
       ],
     );
   }

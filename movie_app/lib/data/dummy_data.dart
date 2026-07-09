@@ -23,7 +23,7 @@ class DummyData {
     Cinema(
       id: 'c3',
       name: 'Cinépolis',
-      logoUrl: 'assets/images/logos/cinepolis.jpg',
+      logoUrl: 'assets/images/logos/Cinepolis.jpg',
       address: 'Blu Plaza, Lantai 3, Bekasi Timur',
       city: 'Bekasi',
       rating: 4.6,
@@ -47,12 +47,12 @@ class DummyData {
       rating: 4.3,
       operatingHours: '12:00 - 21:30 WIB',
     ),
+    // JAKARTA
     Cinema(
       id: 'c6',
       name: 'Plaza Senayan XXI',
       logoUrl: 'assets/images/logos/xx1.jpg',
-      address:
-          'Plaza Senayan Lt. 5, Jl. Asia Afrika No.8, Gelora, Jakarta Pusat',
+      address: 'Plaza Senayan Lt. 5, Jl. Asia Afrika No.8, Gelora, Jakarta Pusat',
       city: 'Jakarta',
       rating: 4.8,
       operatingHours: '11:00 - 22:00',
@@ -61,8 +61,7 @@ class DummyData {
       id: 'c7',
       name: 'CGV Grand Indonesia',
       logoUrl: 'assets/images/logos/cgv.png',
-      address:
-          'Grand Indonesia West Mall Lt. 8, Jl. M.H. Thamrin No.1, Jakarta Pusat',
+      address: 'Grand Indonesia West Mall Lt. 8, Jl. M.H. Thamrin No.1, Jakarta Pusat',
       city: 'Jakarta',
       rating: 4.7,
       operatingHours: '10:00 - 22:30',
@@ -71,8 +70,7 @@ class DummyData {
       id: 'c8',
       name: 'Flix Ashta District 8',
       logoUrl: 'assets/images/logos/flix.jpg',
-      address:
-          'Ashta District 8, SCBD Lot 28, Jl. Jend. Sudirman, Jakarta Selatan',
+      address: 'Ashta District 8, SCBD Lot 28, Jl. Jend. Sudirman, Jakarta Selatan',
       city: 'Jakarta',
       rating: 4.9,
       operatingHours: '10:00 - 22:00',
@@ -80,9 +78,8 @@ class DummyData {
     Cinema(
       id: 'c9',
       name: 'Cinepolis Pejaten Village',
-      logoUrl: 'assets/images/logos/cinepolis.jpg',
-      address:
-          'Pejaten Village Mall Lt. 3, Jl. Warung Jati Barat, Jakarta Selatan',
+      logoUrl: 'assets/images/logos/Cinepolis.jpg',
+      address: 'Pejaten Village Mall Lt. 3, Jl. Warung Jati Barat, Jakarta Selatan',
       city: 'Jakarta',
       rating: 4.5,
       operatingHours: '11:00 - 21:30',
@@ -98,135 +95,89 @@ class DummyData {
     ),
   ];
 
-  static final List<Map<String, String>> movieCast = [
-    {
-      'image': 'https://randomuser.me/api/portraits/men/32.jpg',
-      'name': 'Tom Hanks',
-      'role': 'Woody (voice)',
-    },
-    {
-      'image': 'https://randomuser.me/api/portraits/women/44.jpg',
-      'name': 'Joan Cusack',
-      'role': 'Jessie (voice)',
-    },
-    {
-      'image': 'https://randomuser.me/api/portraits/men/46.jpg',
-      'name': 'Tim Allen',
-      'role': 'Buzz (voice)',
-    },
-    {
-      'image': 'https://randomuser.me/api/portraits/men/22.jpg',
-      'name': 'Don Rickles',
-      'role': 'Mr. Potato',
-    },
-    {
-      'image': 'https://randomuser.me/api/portraits/women/12.jpg',
-      'name': 'Annie Potts',
-      'role': 'Bo Peep',
-    },
-  ];
-
-  static final Map<String, String> movieCrew = {
-    'Sutradara': 'Andrew Stanton',
-    'Produser': 'Jessica Choi, Lindsey Collins',
-  };
-
   static final List<Map<String, dynamic>> cinemaSchedules = [
+    // BIOSKOP BEKASI
     {
-      'cinemaName': 'AEON MALL JGC CGV',
+      'cinemaName': 'XXI Cinema',
+      'type': 'REGULAR 2D',
+      'price': 'Rp40.000',
+      'showtimes': ['12:15', '13:45', '14:30', '16:00', '18:15', '20:30'],
+      'brand': 'XXI',
+      'city': 'Bekasi',
+    },
+    {
+      'cinemaName': 'CGV Cinemas',
       'type': 'REGULAR 2D',
       'price': 'Rp35.000',
-      'showtimes': [
-        '13:00',
-        '14:20',
-        '15:30',
-        '16:50',
-        '17:50',
-        '19:10',
-        '20:30',
-      ],
+      'showtimes': ['11:00', '12:30', '13:45', '15:15', '16:30', '19:00', '20:15'],
       'brand': 'CGV',
+      'city': 'Bekasi',
     },
     {
-      'cinemaName': 'GRAND METROPOLITAN XXI',
-      'type': '2D',
-      'price': 'Rp50.000',
-      'showtimes': ['12:15', '13:45', '14:30', '16:00', '18:15'],
-      'brand': 'XXI',
-    },
-    {
-      'cinemaName': 'MEGA BEKASI XXI',
-      'type': '2D',
-      'price': 'Rp40.000',
-      'showtimes': [
-        '11:00',
-        '12:30',
-        '13:45',
-        '15:15',
-        '16:30',
-        '17:45',
-        '19:00',
-        '20:15',
-        '21:30',
-      ],
-      'brand': 'XXI',
-    },
-    {
-      'cinemaName': 'KOTA KASABLANKA XXI',
-      'type': 'PREMIERE',
+      'cinemaName': 'Cinépolis',
+      'type': 'MACRO XE',
       'price': 'Rp45.000',
+      'showtimes': ['13:00', '14:20', '15:30', '16:50', '17:50', '20:30'],
+      'brand': 'Cinépolis',
+      'city': 'Bekasi',
+    },
+    {
+      'cinemaName': 'Flix Cinema',
+      'type': 'SILVER HALL',
+      'price': 'Rp50.000',
+      'showtimes': ['12:00', '14:30', '17:00', '19:30', '21:00'],
+      'brand': 'Flix',
+      'city': 'Bekasi',
+    },
+    {
+      'cinemaName': 'Platinum Cineplex',
+      'type': 'REGULAR 2D',
+      'price': 'Rp30.000',
+      'showtimes': ['12:45', '15:15', '17:45', '20:15'],
+      'brand': 'Platinum',
+      'city': 'Bekasi',
+    },
+
+    // BIOSKOP JAKARTA
+    {
+      'cinemaName': 'Plaza Senayan XXI',
+      'type': 'PREMIERE',
+      'price': 'Rp150.000',
       'showtimes': ['13:10', '15:40', '18:10', '20:40'],
       'brand': 'XXI',
+      'city': 'Jakarta',
     },
     {
-      'cinemaName': 'PLAZA INDONESIA XXI',
-      'type': 'PREMIERE',
-      'price': 'Rp150.000',
-      'showtimes': ['12:00', '14:30', '17:00', '19:30', '21:00'],
-      'brand': 'XXI',
-    },
-    {
-      'cinemaName': 'GRAND INDONESIA CGV',
+      'cinemaName': 'CGV Grand Indonesia',
       'type': 'STARIUM 2D',
       'price': 'Rp60.000',
-      'showtimes': [
-        '11:30',
-        '13:50',
-        '15:10',
-        '17:40',
-        '19:10',
-        '20:30',
-        '21:50',
-      ],
+      'showtimes': ['11:30', '13:50', '15:10', '17:40', '19:10', '20:30', '21:50'],
       'brand': 'CGV',
+      'city': 'Jakarta',
     },
     {
-      'cinemaName': 'KELAPA GADING XXI',
-      'type': 'IMAX 2D',
-      'price': 'Rp75.000',
-      'showtimes': ['12:45', '15:15', '17:45', '20:15'],
-      'brand': 'XXI',
-    },
-    {
-      'cinemaName': 'PONDOK INDAH 2 XXI',
-      'type': '2D',
-      'price': 'Rp55.000',
-      'showtimes': ['12:15', '14:00', '15:45', '17:30', '19:15', '21:00'],
-      'brand': 'XXI',
-    },
-    {
-      'cinemaName': 'CENTRAL PARK CGV',
-      'type': '4DX 2D',
+      'cinemaName': 'Flix Ashta District 8',
+      'type': 'STELLAR HALL',
       'price': 'Rp120.000',
       'showtimes': ['11:10', '13:20', '15:30', '17:40', '19:50', '22:00'],
-      'brand': 'CGV',
+      'brand': 'Flix',
+      'city': 'Jakarta',
     },
     {
-      'cinemaName': 'SENAYAN CITY XXI',
-      'type': 'PREMIERE',
-      'price': 'Rp150.000',
+      'cinemaName': 'Cinepolis Pejaten Village',
+      'type': 'REGULAR 2D',
+      'price': 'Rp45.000',
+      'showtimes': ['12:15', '14:00', '15:45', '17:30', '19:15', '21:00'],
+      'brand': 'Cinépolis',
+      'city': 'Jakarta',
+    },
+    {
+      'cinemaName': 'CGV FX Sudirman',
+      'type': '4DX 2D',
+      'price': 'Rp85.000',
       'showtimes': ['13:00', '15:30', '18:00', '20:30'],
-      'brand': 'XXI',
+      'brand': 'CGV',
+      'city': 'Jakarta',
     },
   ];
 }

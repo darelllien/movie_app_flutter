@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:movie_app/data/account_data.dart'; // Pastikan path import sesuai
-import 'register_page.dart';
-import '../main/main_page.dart'; // Sesuaikan path
+import 'package:movie_app/data/account_data.dart';
+import '../../routes/app_routes.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,34 +16,16 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _login() async {
     if (_formKey.currentState!.validate()) {
-      await AccountData.loginUser(
+      final isSuccess = await AccountData.loginUser(
         _emailController.text.trim(),
         _passwordController.text,
       );
 
       if (!mounted) return;
 
-      final isSuccess = await AccountData.loginUser(
-        _emailController.text, // Sesuaikan dengan nama controller email aslimu
-        _passwordController
-            .text, // Sesuaikan dengan nama controller password aslimu
-      );
-
-      // ... (jika ada kode validasi form input di antaranya, biarkan saja) ...
-
-      // 2. DI BARIS 43 (Ganti blok if-else navigasi lamamu dengan ini):
       if (isSuccess) {
-        Navigator.pushReplacement(
-          // ignore: use_build_context_synchronously
-          context,
-          MaterialPageRoute(
-            // PENTING: Ganti 'NamaClassUtamaProyekmu' di bawah ini dengan class dashboard yang kamu temukan tadi!
-            // Contoh kemungkinan: MainDashboard, DashboardScreen, NavScreen, HomeScreen, dsb.
-            builder: (context) => const MainPage(),
-          ),
-        );
+        Navigator.pushReplacementNamed(context, AppRoutes.main);
       } else {
-        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Email atau Password salah!')),
         );
@@ -73,7 +54,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 32),
 
-                // Field Email
                 TextFormField(
                   controller: _emailController,
                   keyboardType: TextInputType.emailAddress,
@@ -98,7 +78,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Field Password
                 TextFormField(
                   controller: _passwordController,
                   obscureText: true,
@@ -119,11 +98,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 ElevatedButton(onPressed: _login, child: const Text('Masuk')),
                 TextButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const RegisterScreen()),
-                    );
+                  onPressed: () async {
+                    final result = await Navigator.pushNamed(context, AppRoutes.register);
+                    if (!context.mounted) return;
+                    if (result == true) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Registrasi berhasil, silakan login')),
+                      );
+                    }
                   },
                   child: Text(
                     'Belum punya akun? Daftar di sini',
