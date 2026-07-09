@@ -54,6 +54,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
     } catch (e) {
       ScaffoldMessenger.of(
+        // ignore: use_build_context_synchronously
         context,
       ).showSnackBar(SnackBar(content: Text('Gagal mengambil gambar: $e')));
     }
@@ -132,7 +133,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 children: [
                   CircleAvatar(
                     radius: 60,
-                    backgroundColor: AppColors.primary.withOpacity(0.1),
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                     backgroundImage: _selectedImagePath != null
                         ? FileImage(File(_selectedImagePath!))
                         : null,

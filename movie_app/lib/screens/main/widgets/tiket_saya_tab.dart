@@ -102,7 +102,7 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
                           decoration: BoxDecoration(
                             color: _getStatusColor(
                               currentStatus,
-                            ).withOpacity(0.12),
+                            ).withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(20),
                           ),
                           child: Text(
@@ -351,7 +351,7 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
         borderRadius: BorderRadius.circular(14),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.02),
+            color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 6,
             offset: const Offset(0, 3),
           ),
@@ -401,7 +401,7 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: color.withOpacity(0.1),
+                              color: color.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Text(
@@ -478,7 +478,7 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
-        color: AppColors.base.withOpacity(0.12),
+        color: AppColors.base.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(5),
       ),
       child: Row(
