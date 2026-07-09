@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/foundation.dart';
 import '../models/movie.dart';
 
 class ApiService {
@@ -43,6 +44,32 @@ class ApiService {
     } else {
       throw Exception('Gagal memuat data credits dari TMDB');
     }
+  }
+
+  Future<String?> getMovieTrailer(int movieId) async {
+    if (_token.isEmpty) return null;
+
+    final url = Uri.parse('$baseUrl/movie/$movieId/videos');
+    try {
+      final response = await http.get(url, headers: {
+        'Authorization': 'Bearer $_token',
+        'Accept': 'application/json',
+      });
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final List results = data['results'] ?? [];
+        final trailer = results.firstWhere(
+          (v) => v['type'] == 'Trailer' && v['site'] == 'YouTube',
+          orElse: () => null,
+        );
+        if (trailer != null) {
+          return 'https://www.youtube.com/watch?v=${trailer['key']}';
+        }
+      }
+    } catch (e) {
+      debugPrint('Error fetching trailer: $e');
+    }
+    return null;
   }
 
   Future<List<Movie>> _fetchMovieList(Uri url) async {
