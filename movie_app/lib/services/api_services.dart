@@ -18,6 +18,12 @@ class ApiService {
     return _fetchMovieList(url);
   }
 
+  Future<List<Movie>> searchMovies(String query) async {
+    if (query.isEmpty) return [];
+    final url = Uri.parse('$baseUrl/search/movie?query=$query&language=id-ID&page=1');
+    return _fetchMovieList(url);
+  }
+
   Future<List<Movie>> getPopularMovies() async {
     final url = Uri.parse('$baseUrl/movie/popular?language=id-ID&page=1');
     return _fetchMovieList(url);
