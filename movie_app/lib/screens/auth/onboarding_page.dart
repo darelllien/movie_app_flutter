@@ -61,7 +61,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // skip
             Align(
               alignment: Alignment.topRight,
               child: TextButton(
@@ -91,7 +90,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         Container(
                           padding: const EdgeInsets.all(32),
                           decoration: BoxDecoration(
-                            // ignore: deprecated_member_use
                             color: theme.colorScheme.primary.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
@@ -103,7 +101,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                         const SizedBox(height: 48),
 
-                        // Judul
                         Text(
                           onboardingData[index]["title"],
                           style: theme.textTheme.titleLarge?.copyWith(
@@ -114,7 +111,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         ),
                         const SizedBox(height: 16),
 
-                        // Sub-judul / Deskripsi
                         Text(
                           onboardingData[index]["desc"],
                           style: theme.textTheme.bodyLarge?.copyWith(
@@ -145,7 +141,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                     ),
 
-                    // Tombol "Selanjutnya" atau "Mulai Sekarang"
                     Align(
                       alignment: Alignment.centerRight,
                       child: ElevatedButton(

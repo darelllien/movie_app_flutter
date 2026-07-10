@@ -17,7 +17,6 @@ class CinemaDetailPage extends StatefulWidget {
 }
 
 class _CinemaDetailPageState extends State<CinemaDetailPage> {
-  // 1. Ubah jadi nullable karena akan dipanggil berulang kali
   Future<List<Map<String, dynamic>>>? _moviesFuture;
 
   final DateTime _baseDate = DateTime(2026, 7, 10);
@@ -32,23 +31,19 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
     _updateMoviesForSelectedDate();
   }
 
-  // 2. Fungsi pemicu pembaruan data film berdasarkan tanggal
   void _updateMoviesForSelectedDate() {
     setState(() {
       _moviesFuture = _fetchAndRandomizeMovies(_selectedDate);
     });
   }
 
-  // 3. Tambahkan parameter tanggal untuk jadi "Seed" acakan
   Future<List<Map<String, dynamic>>> _fetchAndRandomizeMovies(DateTime date) async {
     final apiService = ApiService();
     final movies = await apiService.getNowPlayingMovies();
 
-    // Menggunakan kombinasi hari dan bulan sebagai seed unik
     final seed = date.day + date.month;
     final random = Random(seed);
 
-    // Salin list film agar tidak merusak data asli
     final shuffledMovies = List<Movie>.from(movies)..shuffle(random);
     final count = random.nextInt(3) + 3;
     final selectedMovies = shuffledMovies.take(count).toList();
@@ -59,7 +54,6 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
     ];
 
     return selectedMovies.map((m) {
-      // Acak jam tayang secara spesifik
       final movieRandom = Random(m.id + seed);
       final currentShowtimes = List<String>.from(allPossibleShowtimes)..shuffle(movieRandom);
 
@@ -261,7 +255,6 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
     return Container(width: 100, height: 100, color: Colors.grey[300]);
   }
 
-  // 4. Update UI kalender agar bisa di-klik 3 hari ke depan
   Widget _buildDatePicker() {
     return Container(
       color: Colors.white,
@@ -277,7 +270,7 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
               final date = _baseDate.add(Duration(days: index));
 
               final isToday = index == 0;
-              final isSelectable = index <= 3; // Mengizinkan klik untuk hari ini + 3 hari ke depan
+              final isSelectable = index <= 3;
               final isSelected = date.day == _selectedDate.day && date.month == _selectedDate.month;
               String dayLabel = isToday ? 'HARI INI' : _getDayName(date.weekday);
 
@@ -289,7 +282,6 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
                     _selectedMovie = null;
                     _selectedShowtime = null;
                   });
-                  // Pemicu acak ulang film saat ganti tanggal
                   _updateMoviesForSelectedDate();
                 }
                     : null,
@@ -529,7 +521,6 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    // 5. UPDATE WARNA TOMBOL KE APPCOLORS.PRIMARY
                     color: isSelected ? AppColors.primary : Colors.white,
                     border: Border.all(
                       color: isSelected ? AppColors.primary : Colors.grey[300]!,

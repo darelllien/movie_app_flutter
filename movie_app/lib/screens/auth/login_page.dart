@@ -66,7 +66,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // --- MENGGUNAKAN LOGO APP_ICON.JPG ---
                   Center(
                     child: Container(
                       width: 100,
@@ -326,10 +325,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (!mounted) return;
 
                         if (isSuccess) {
-                          // ignore: use_build_context_synchronously
                           Navigator.pushReplacementNamed(context, '/main');
                         } else {
-                          // ignore: use_build_context_synchronously
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(content: Text("Login Google gagal")),
                           );
@@ -340,7 +337,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         }
                         if (!mounted) return;
                         ScaffoldMessenger.of(
-                          // ignore: use_build_context_synchronously
                           context,
                         ).showSnackBar(SnackBar(content: Text(e.toString())));
                       }
