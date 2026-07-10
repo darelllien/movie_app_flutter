@@ -56,11 +56,11 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
   }
 
   void _showBarcodePopup(
-      BuildContext context,
-      TransactionModel tx,
-      String dateStr,
-      String timeStr,
-      ) {
+    BuildContext context,
+    TransactionModel tx,
+    String dateStr,
+    String timeStr,
+  ) {
     final String currentStatus = _getTicketStatus(tx);
 
     showGeneralDialog(
@@ -100,7 +100,6 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            // ignore: deprecated_member_use
                             color: _getStatusColor(
                               currentStatus,
                               // ignore: deprecated_member_use
@@ -281,11 +280,11 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
   }
 
   Widget _buildPopupRow(
-      IconData icon,
-      String label,
-      String value, {
-        bool isHighlight = false,
-      }) {
+    IconData icon,
+    String label,
+    String value, {
+    bool isHighlight = false,
+  }) {
     return Row(
       children: [
         Icon(icon, size: 16, color: AppColors.textSecondary),
@@ -311,7 +310,9 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
   @override
   Widget build(BuildContext context) {
     if (widget.tickets.isEmpty) {
-      return const Center(child: Text('Maaf, Anda tidak sedang memiliki tiket'));
+      return const Center(
+        child: Text('Maaf, Anda tidak sedang memiliki tiket'),
+      );
     }
     return ListView.builder(
       padding: const EdgeInsets.all(16),
@@ -339,16 +340,15 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
   }
 
   Widget _buildTicketCard(
-      TransactionModel tx,
-      String dateStr,
-      String timeStr,
-      String label,
-      Color color,
-      ) {
+    TransactionModel tx,
+    String dateStr,
+    String timeStr,
+    String label,
+    Color color,
+  ) {
     final int total = (tx.ticketCount * tx.pricePerTicket) + 3000;
     return Container(
       margin: const EdgeInsets.only(bottom: 14),
-      // ignore: deprecated_member_use
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -399,7 +399,6 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
-                          // ignore: deprecated_member_use
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -447,7 +446,7 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
           Row(
             children: List.generate(
               32,
-                  (i) => Expanded(
+              (i) => Expanded(
                 child: Container(
                   color: i % 2 == 0 ? Colors.transparent : Colors.grey[200],
                   height: 1.2,
@@ -481,7 +480,6 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
   }
 
   Widget _badge(IconData icon, String text) {
-    // ignore: deprecated_member_use
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
       decoration: BoxDecoration(
@@ -506,12 +504,12 @@ class _TiketSayaTabState extends State<TiketSayaTab> {
   }
 
   Widget _rowDetail(
-      IconData icon,
-      String label,
-      String value, {
-        bool isBold = false,
-        Color? valueColor,
-      }) {
+    IconData icon,
+    String label,
+    String value, {
+    bool isBold = false,
+    Color? valueColor,
+  }) {
     return Row(
       children: [
         Icon(icon, size: 14, color: AppColors.textSecondary),

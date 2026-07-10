@@ -67,7 +67,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
       minute = int.parse(widget.time.split(':')[1]);
     } catch (_) {}
 
-    // Cari bagian ini di dalam void _showSuccessPopup(String paymentName, int grandTotal)
     final newTx = TransactionModel(
       id: 'TX-${DateTime.now().millisecondsSinceEpoch}',
       movie: widget.movie,
@@ -175,7 +174,6 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         ),
                         onPressed: () {
                           Navigator.of(context).pop();
-                          // Mengembalikan user ke root utama aplikasi secara bersih
                           Navigator.popUntil(context, (route) => route.isFirst);
                         },
                         child: Text(
@@ -415,9 +413,9 @@ class _CheckoutPageState extends State<CheckoutPage> {
 
         return Container(
           margin: const EdgeInsets.only(bottom: 12),
-          clipBehavior: Clip.antiAlias, // Penting agar background putih konten tidak menutupi border melengkung
+          clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
-            color: AppColors.primary, // Background header warna primer
+            color: AppColors.primary,
             borderRadius: BorderRadius.circular(14),
             boxShadow: [
               if (isSelected)
@@ -426,13 +424,12 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   color: AppColors.primary.withOpacity(0.3),
                   blurRadius: 8,
                   offset: const Offset(0, 4),
-                )
+                ),
             ],
           ),
           child: Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: ExpansionTile(
-              // Menyesuaikan warna header saat collapse maupun expand
               backgroundColor: AppColors.primary,
               collapsedBackgroundColor: AppColors.primary,
               onExpansionChanged: (expanded) {
@@ -441,28 +438,23 @@ class _CheckoutPageState extends State<CheckoutPage> {
                   if (!isFolder) _selectedSubBankId = null;
                 });
               },
-              leading: Icon(
-                method.icon,
-                color: Colors.white, // Ikon warna putih
-                size: 22,
-              ),
+              leading: Icon(method.icon, color: Colors.white, size: 22),
               title: Text(
                 method.name,
                 style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.bold,
-                  color: Colors.white, // Tulisan header warna putih
+                  color: Colors.white,
                 ),
               ),
               trailing: const Icon(
                 Icons.keyboard_arrow_down,
                 size: 22,
-                color: Colors.white, // Ikon panah putih
+                color: Colors.white,
               ),
-              // AREA KONTEN DROPDOWN
               children: [
                 Container(
                   width: double.infinity,
-                  color: Colors.white, // Background tulisan pada dropdown warna putih
+                  color: Colors.white,
                   child: Column(
                     children: [
                       if (isFolder)
@@ -473,7 +465,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                           ),
                           child: Column(
                             children: method.subBanks!.map((bank) {
-                              final isBankSelected = _selectedSubBankId == bank.id;
+                              final isBankSelected =
+                                  _selectedSubBankId == bank.id;
 
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 8),
@@ -490,11 +483,15 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                   ),
                                 ),
                                 child: Theme(
-                                  data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+                                  data: Theme.of(
+                                    context,
+                                  ).copyWith(dividerColor: Colors.transparent),
                                   child: ExpansionTile(
                                     onExpansionChanged: (expanded) {
                                       if (expanded) {
-                                        setState(() => _selectedSubBankId = bank.id);
+                                        setState(
+                                          () => _selectedSubBankId = bank.id,
+                                        );
                                       }
                                     },
                                     title: Text(
@@ -504,24 +501,35 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                         fontWeight: FontWeight.bold,
                                         color: isBankSelected
                                             ? AppColors.primary
-                                            : Colors.black, // Tulisan biasa hitam
+                                            : Colors.black,
                                       ),
                                     ),
                                     children: [
                                       Container(
                                         width: double.infinity,
-                                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+                                        padding: const EdgeInsets.fromLTRB(
+                                          16,
+                                          0,
+                                          16,
+                                          14,
+                                        ),
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: bank.instructions.map((step) {
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: bank.instructions.map((
+                                            step,
+                                          ) {
                                             return Padding(
-                                              padding: const EdgeInsets.only(bottom: 4),
+                                              padding: const EdgeInsets.only(
+                                                bottom: 4,
+                                              ),
                                               child: Text(
                                                 step,
-                                                style: AppTextStyles.caption.copyWith(
-                                                  color: Colors.black87, // Tulisan instruksi hitam
-                                                  height: 1.4,
-                                                ),
+                                                style: AppTextStyles.caption
+                                                    .copyWith(
+                                                      color: Colors.black87,
+                                                      height: 1.4,
+                                                    ),
                                               ),
                                             );
                                           }).toList(),
@@ -546,7 +554,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 child: Text(
                                   step,
                                   style: AppTextStyles.caption.copyWith(
-                                    color: Colors.black, // Tulisan instruksi biasa hitam
+                                    color: Colors.black,
                                     height: 1.4,
                                     fontSize: 12,
                                   ),
