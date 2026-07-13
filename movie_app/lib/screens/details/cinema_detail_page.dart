@@ -17,7 +17,7 @@ class CinemaDetailPage extends StatefulWidget {
 }
 
 class _CinemaDetailPageState extends State<CinemaDetailPage> {
-  late Future<List<Map<String, dynamic>>> _moviesFuture;
+  Future<List<Map<String, dynamic>>>? _moviesFuture;
 
   final DateTime _baseDate = DateTime(2026, 7, 10);
   late DateTime _selectedDate = _baseDate;
@@ -28,36 +28,37 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
   @override
   void initState() {
     super.initState();
-    _moviesFuture = _fetchAndRandomizeMovies();
+    _updateMoviesForSelectedDate();
   }
 
-  Future<List<Map<String, dynamic>>> _fetchAndRandomizeMovies() async {
+  void _updateMoviesForSelectedDate() {
+    setState(() {
+      _moviesFuture = _fetchAndRandomizeMovies(_selectedDate);
+    });
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchAndRandomizeMovies(DateTime date) async {
     final apiService = ApiService();
     final movies = await apiService.getNowPlayingMovies();
 
-    final random = Random();
-    movies.shuffle(random);
+    final seed = date.day + date.month;
+    final random = Random(seed);
+
+    final shuffledMovies = List<Movie>.from(movies)..shuffle(random);
     final count = random.nextInt(3) + 3;
-    final selectedMovies = movies.take(count).toList();
+    final selectedMovies = shuffledMovies.take(count).toList();
 
     final allPossibleShowtimes = [
-      '10:00',
-      '11:15',
-      '12:30',
-      '13:45',
-      '14:30',
-      '15:15',
-      '16:45',
-      '18:00',
-      '19:15',
-      '20:30',
-      '21:45',
+      '10:00', '11:15', '12:30', '13:45', '14:30',
+      '15:15', '16:45', '18:00', '19:15', '20:30', '21:45',
     ];
 
     return selectedMovies.map((m) {
-      allPossibleShowtimes.shuffle(random);
-      final showtimeCount = random.nextInt(4) + 3;
-      var times = allPossibleShowtimes.take(showtimeCount).toList();
+      final movieRandom = Random(m.id + seed);
+      final currentShowtimes = List<String>.from(allPossibleShowtimes)..shuffle(movieRandom);
+
+      final showtimeCount = movieRandom.nextInt(4) + 3;
+      var times = currentShowtimes.take(showtimeCount).toList();
       times.sort();
       return {'movie': m, 'showtimes': times};
     }).toList();
@@ -65,18 +66,8 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
 
   String _getMonthName(int month) {
     const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'Mei',
-      'Jun',
-      'Jul',
-      'Agu',
-      'Sep',
-      'Okt',
-      'Nov',
-      'Des',
+      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+      'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des',
     ];
     return months[month - 1];
   }
@@ -137,16 +128,16 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
             ),
             onPressed: isTicketActive
                 ? () {
-                    String formattedDateStr =
-                        "${_selectedDate.day} ${_getMonthName(_selectedDate.month)}";
-                    TicketBottomSheet.show(
-                      context,
-                      movieTitle: _selectedMovie!.title,
-                      cinemaName: widget.cinema.name,
-                      selectedDate: formattedDateStr,
-                      selectedTime: _selectedShowtime!,
-                    );
-                  }
+              String formattedDateStr =
+                  "${_selectedDate.day} ${_getMonthName(_selectedDate.month)}";
+              TicketBottomSheet.show(
+                context,
+                movieTitle: _selectedMovie!.title,
+                cinemaName: widget.cinema.name,
+                selectedDate: formattedDateStr,
+                selectedTime: _selectedShowtime!,
+              );
+            }
                 : null,
             child: Text(
               'BELI TIKET',
@@ -169,21 +160,21 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
             borderRadius: BorderRadius.circular(8),
             child: widget.cinema.logoUrl.startsWith('http')
                 ? Image.network(
-                    widget.cinema.logoUrl,
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildErrorLogo(),
-                  )
+              widget.cinema.logoUrl,
+              width: 100,
+              height: 100,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  _buildErrorLogo(),
+            )
                 : Image.asset(
-                    widget.cinema.logoUrl,
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        _buildErrorLogo(),
-                  ),
+              widget.cinema.logoUrl,
+              width: 100,
+              height: 100,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  _buildErrorLogo(),
+            ),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -267,63 +258,74 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
   Widget _buildDatePicker() {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 16.0),
-      child: SizedBox(
-        height: 60,
-        child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: 7,
-          itemBuilder: (context, index) {
-            final date = _baseDate.add(Duration(days: index));
-            final isToday = index == 0;
-            final isSelected =
-                date.day == _selectedDate.day &&
-                date.month == _selectedDate.month;
-            String dayLabel = isToday ? 'HARI INI' : _getDayName(date.weekday);
+      padding: const EdgeInsets.only(top: 16.0, bottom: 16.0),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: SizedBox(
+          height: 70,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: 7,
+            itemBuilder: (context, index) {
+              final date = _baseDate.add(Duration(days: index));
 
-            return GestureDetector(
-              onTap: isToday
-                  ? () {
-                      setState(() {
-                        _selectedDate = date;
-                        _selectedMovie = null;
-                        _selectedShowtime = null;
-                      });
-                    }
-                  : null,
-              child: Container(
-                width: 60,
-                margin: const EdgeInsets.only(right: 8),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? const Color(0xFF1B2C4F)
-                      : Colors.grey[300],
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '${date.day.toString().padLeft(2, '0')} ${_getMonthName(date.month)}',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: isSelected ? Colors.white : Colors.black87,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                      ),
+              final isToday = index == 0;
+              final isSelectable = index <= 3;
+              final isSelected = date.day == _selectedDate.day && date.month == _selectedDate.month;
+              String dayLabel = isToday ? 'HARI INI' : _getDayName(date.weekday);
+
+              return GestureDetector(
+                onTap: isSelectable
+                    ? () {
+                  setState(() {
+                    _selectedDate = date;
+                    _selectedMovie = null;
+                    _selectedShowtime = null;
+                  });
+                  _updateMoviesForSelectedDate();
+                }
+                    : null,
+                child: Container(
+                  width: 80,
+                  margin: const EdgeInsets.only(right: 12),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? AppColors.primary
+                        : (isSelectable ? Colors.white : Colors.grey[100]),
+                    border: Border.all(
+                        color: isSelected
+                            ? AppColors.primary
+                            : Colors.grey[300]!
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      dayLabel,
-                      style: AppTextStyles.caption.copyWith(
-                        color: isSelected ? Colors.white : Colors.black87,
-                        fontSize: 10,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '${date.day.toString().padLeft(2, '0')} ${_getMonthName(date.month)}',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: isSelected
+                              ? Colors.white
+                              : (isSelectable ? AppColors.textPrimary : Colors.grey[400]),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(
+                        dayLabel,
+                        style: AppTextStyles.caption.copyWith(
+                          color: isSelected
+                              ? Colors.white
+                              : (isSelectable ? AppColors.textSecondary : Colors.grey[400]),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );
@@ -425,7 +427,7 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
                         ),
                         const SizedBox(width: 4),
                         ...genres.map(
-                          (g) => Container(
+                              (g) => Container(
                             margin: const EdgeInsets.only(right: 4),
                             padding: const EdgeInsets.symmetric(
                               horizontal: 6,
@@ -519,9 +521,9 @@ class _CinemaDetailPageState extends State<CinemaDetailPage> {
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: isSelected ? const Color(0xFFF2A30F) : Colors.white,
+                    color: isSelected ? AppColors.primary : Colors.white,
                     border: Border.all(
-                      color: isSelected ? const Color(0xFFF2A30F) : Colors.grey[300]!,
+                      color: isSelected ? AppColors.primary : Colors.grey[300]!,
                     ),
                     borderRadius: BorderRadius.circular(6),
                   ),
